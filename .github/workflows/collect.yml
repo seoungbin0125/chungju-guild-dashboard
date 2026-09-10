@@ -1,0 +1,49 @@
+name: Collect Dashboard Data
+
+on:
+  workflow_dispatch:
+  schedule:
+    # 매일 KST 02:10 실행 = UTC 17:10 (MGF 기준일이 갱신된 뒤 수집)
+    - cron: "10 17 * * *"
+
+permissions:
+  contents: write
+
+jobs:
+  collect:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - name: Test MGF parsers
+        run: npm test
+
+      - name: Collect MGF guild members
+        env:
+          GUILD_NAMES: 충주시
+          MEMBER_LIMIT: "120"
+        run: npm run collect:all
+
+      - name: Collect guild contents
+        env:
+          GUILD_CONTENT_NAMES: 충주시
+        run: npm run collect:contents
+
+      - name: Collect gift card hotdeals
+        env:
+          HOTDEAL_KEYWORD: 기프트카드
+          HOTDEAL_LIMIT: "5"
+        run: npm run collect:hotdeals
+
+      - name: Commit changes
+        uses: stefanzweifel/git-auto-commit-action@v5
+        with:
+          commit_message: "chore: update dashboard data"
+          file_pattern: data/latest.json data/history.json data/guild-contents.json data/guild-contents-history.json data/hotdeals.json

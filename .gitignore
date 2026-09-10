@@ -1,0 +1,9 @@
+node_modules/
+.DS_Store
+.env
+
+# Cloudflare / Node
+node_modules/
+.wrangler/
+.cloudflare-pages-output/
+.dev.vars

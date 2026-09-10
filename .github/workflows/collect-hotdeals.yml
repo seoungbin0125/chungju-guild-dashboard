@@ -1,0 +1,35 @@
+name: Collect Hotdeal Data
+
+on:
+  workflow_dispatch:
+  schedule:
+    # 매시간 17분 실행
+    - cron: "17 * * * *"
+
+permissions:
+  contents: write
+
+jobs:
+  collect-hotdeals:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - name: Collect gift card hotdeals
+        env:
+          HOTDEAL_KEYWORD: 기프트카드
+          HOTDEAL_LIMIT: "5"
+        run: npm run collect:hotdeals
+
+      - name: Commit changes
+        uses: stefanzweifel/git-auto-commit-action@v5
+        with:
+          commit_message: "chore: update gift card hotdeals"
+          file_pattern: data/hotdeals.json

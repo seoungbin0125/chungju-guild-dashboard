@@ -1,0 +1,204 @@
+rules_version = '2';
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+    function isGuideCollection(name) {
+      return name == 'guidePosts' || name == 'chungjuGuidePosts';
+    }
+    function isOverrideCollection(name) {
+      return name == 'weeklyOverrides' || name == 'chungjuWeeklyOverrides';
+    }
+    function isLobbyCollection(name) {
+      return name == 'virtualLobby' || name == 'chungjuVirtualLobby';
+    }
+    function isGameCollection(name) {
+      return name == 'jellyGame' || name == 'chungjuJellyGame';
+    }
+
+    match /{guideCollection}/{postId} {
+      allow read: if isGuideCollection(guideCollection);
+
+      // 길드 내부용 초간단 게시판 규칙입니다.
+      // 화면에서는 비밀번호 5645를 확인하지만, 정적 사이트 특성상 강한 서버 보안은 아닙니다.
+      // 외부 공개 사이트로 운영하면서 관리자 보안이 필요하면 Firebase Authentication 방식으로 전환하세요.
+      allow create: if isGuideCollection(guideCollection)
+        && request.resource.data.keys().hasOnly([
+          'title', 'content', 'author', 'category', 'createdAt', 'updatedAt'
+        ])
+        && request.resource.data.title is string
+        && request.resource.data.title.size() >= 1
+        && request.resource.data.title.size() <= 80
+        && request.resource.data.content is string
+        && request.resource.data.content.size() >= 1
+        && request.resource.data.content.size() <= 8000
+        && request.resource.data.author is string
+        && request.resource.data.author.size() <= 30
+        && request.resource.data.category is string
+        && request.resource.data.category.size() <= 20;
+
+      allow update: if false;
+      allow delete: if isGuideCollection(guideCollection);
+    }
+
+    match /{overrideCollection}/{overrideId} {
+      allow read: if isOverrideCollection(overrideCollection);
+
+      // 전투력 비교값/지난주 토벌 기록 수동 보정용 컬렉션입니다.
+      // GitHub Pages에서 바로 저장하기 위한 길드 내부용 간단 규칙입니다.
+      allow create, update: if isOverrideCollection(overrideCollection)
+        && request.resource.data.keys().hasOnly([
+          'date', 'comparisonTargetDate', 'items', 'updatedAt'
+        ])
+        && request.resource.data.date is string
+        && request.resource.data.comparisonTargetDate is string
+        && request.resource.data.items is list
+        && request.resource.data.items.size() <= 300;
+
+      allow delete: if isOverrideCollection(overrideCollection);
+    }
+
+
+    match /{lobbyCollection}/plaza/participants/{participantId} {
+      allow read: if isLobbyCollection(lobbyCollection);
+
+      // 버츄얼 광장 위치 동기화용입니다. 공개 길드 포털에서 바로 쓰기 위한 간단 규칙입니다.
+      allow create, update: if isLobbyCollection(lobbyCollection)
+        && request.resource.data.keys().hasOnly([
+          'userId', 'memberKey', 'nickname', 'guild', 'job', 'x', 'y',
+          'hp', 'maxHp', 'jailedUntil', 'shieldUntil', 'attackedAt', 'lastAttacker',
+          'lastMessage', 'lastSeen', 'updatedAt'
+        ])
+        && request.resource.data.userId is string
+        && request.resource.data.userId.size() <= 80
+        && request.resource.data.memberKey is string
+        && request.resource.data.memberKey.size() <= 80
+        && request.resource.data.nickname is string
+        && request.resource.data.nickname.size() <= 30
+        && request.resource.data.guild is string
+        && request.resource.data.guild.size() <= 30
+        && request.resource.data.job is string
+        && request.resource.data.job.size() <= 40
+        && request.resource.data.x is number
+        && request.resource.data.x >= 0
+        && request.resource.data.x <= 100
+        && request.resource.data.y is number
+        && request.resource.data.y >= 0
+        && request.resource.data.y <= 100
+        && request.resource.data.hp is number
+        && request.resource.data.hp >= 0
+        && request.resource.data.hp <= 1000000000000000000
+        && request.resource.data.maxHp is number
+        && request.resource.data.maxHp >= 1
+        && request.resource.data.maxHp <= 1000000000000000000
+        && request.resource.data.jailedUntil is string
+        && request.resource.data.jailedUntil.size() <= 40
+        && request.resource.data.shieldUntil is string
+        && request.resource.data.shieldUntil.size() <= 40
+        && request.resource.data.attackedAt is string
+        && request.resource.data.attackedAt.size() <= 40
+        && request.resource.data.lastAttacker is string
+        && request.resource.data.lastAttacker.size() <= 30
+        && request.resource.data.lastMessage is string
+        && request.resource.data.lastMessage.size() <= 120
+        && request.resource.data.lastSeen is string
+        && request.resource.data.lastSeen.size() <= 40;
+
+      allow delete: if isLobbyCollection(lobbyCollection);
+    }
+
+    match /{lobbyCollection}/plaza/messages/{messageId} {
+      allow read: if isLobbyCollection(lobbyCollection);
+
+      allow create: if isLobbyCollection(lobbyCollection)
+        && request.resource.data.keys().hasOnly([
+          'userId', 'nickname', 'guild', 'text', 'createdAt'
+        ])
+        && request.resource.data.userId is string
+        && request.resource.data.userId.size() <= 80
+        && request.resource.data.nickname is string
+        && request.resource.data.nickname.size() <= 30
+        && request.resource.data.guild is string
+        && request.resource.data.guild.size() <= 30
+        && request.resource.data.text is string
+        && request.resource.data.text.size() >= 1
+        && request.resource.data.text.size() <= 120;
+
+      allow update: if false;
+      allow delete: if isLobbyCollection(lobbyCollection);
+    }
+
+    match /{gameCollection}/arena/players/{playerId} {
+      allow read: if isGameCollection(gameCollection);
+
+      // 메키 젤리난투 실시간 위치/질량/점수 동기화용입니다.
+      // 공개 정적 사이트에서 바로 플레이하기 위한 간단 규칙입니다.
+      allow create, update: if isGameCollection(gameCollection)
+        && request.resource.data.keys().hasOnly([
+          'userId', 'memberKey', 'nickname', 'guild', 'job', 'team', 'x', 'y',
+          'mass', 'score', 'safeUntil', 'eatenAt', 'lastEvent', 'lastSeen', 'updatedAt'
+        ])
+        && request.resource.data.keys().hasAll([
+          'userId', 'memberKey', 'nickname', 'guild', 'job', 'team', 'x', 'y',
+          'mass', 'score', 'safeUntil', 'eatenAt', 'lastEvent', 'lastSeen'
+        ])
+        && request.resource.data.userId is string
+        && request.resource.data.userId.size() <= 80
+        && request.resource.data.memberKey is string
+        && request.resource.data.memberKey.size() <= 80
+        && request.resource.data.nickname is string
+        && request.resource.data.nickname.size() <= 30
+        && request.resource.data.guild is string
+        && request.resource.data.guild.size() <= 30
+        && request.resource.data.job is string
+        && request.resource.data.job.size() <= 40
+        && request.resource.data.team is string
+        && request.resource.data.team.size() <= 16
+        && request.resource.data.x is number
+        && request.resource.data.x >= 0
+        && request.resource.data.x <= 100
+        && request.resource.data.y is number
+        && request.resource.data.y >= 0
+        && request.resource.data.y <= 100
+        && request.resource.data.mass is number
+        && request.resource.data.mass >= 1
+        && request.resource.data.mass <= 400
+        && request.resource.data.score is number
+        && request.resource.data.score >= 0
+        && request.resource.data.score <= 10000000
+        && request.resource.data.safeUntil is string
+        && request.resource.data.safeUntil.size() <= 40
+        && request.resource.data.eatenAt is string
+        && request.resource.data.eatenAt.size() <= 40
+        && request.resource.data.lastEvent is string
+        && request.resource.data.lastEvent.size() <= 160
+        && request.resource.data.lastSeen is string
+        && request.resource.data.lastSeen.size() <= 40;
+
+      allow delete: if isGameCollection(gameCollection);
+    }
+
+    match /{gameCollection}/arena/events/{eventId} {
+      allow read: if isGameCollection(gameCollection);
+
+      allow create: if isGameCollection(gameCollection)
+        && request.resource.data.keys().hasOnly([
+          'userId', 'nickname', 'guild', 'type', 'text', 'createdAt'
+        ])
+        && request.resource.data.userId is string
+        && request.resource.data.userId.size() <= 80
+        && request.resource.data.nickname is string
+        && request.resource.data.nickname.size() <= 30
+        && request.resource.data.guild is string
+        && request.resource.data.guild.size() <= 30
+        && request.resource.data.type is string
+        && request.resource.data.type.size() <= 20
+        && request.resource.data.text is string
+        && request.resource.data.text.size() >= 1
+        && request.resource.data.text.size() <= 160;
+
+      allow update: if false;
+      allow delete: if isGameCollection(gameCollection);
+    }
+
+  }
+}

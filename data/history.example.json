@@ -1,0 +1,32 @@
+[
+  {
+    "date": "2026-09-07",
+    "sourceDataDate": "2026-09-07",
+    "capturedAt": "2026-09-07 02:10:00",
+    "guild": "충주시",
+    "sourceUrl": "https://mgf.gg/contents/guild_info.php?g_name=충주시",
+    "raidPeriod": {
+      "currentWeekKey": "2026-09-07",
+      "scoreWeekKey": "2026-08-31",
+      "kind": "previous_week_final",
+      "isFinal": true,
+      "metricLabel": "지난주 토벌 확정"
+    },
+    "members": [
+      {
+        "nickname": "예시캐릭터",
+        "rank": 1,
+        "job": "비숍",
+        "level": 110,
+        "powerRaw": "1000000000000",
+        "powerValue": 1000000000000,
+        "powerRank": 1,
+        "sourceTobeolRaw": "250000000000",
+        "sourceTobeolValue": 250000000000,
+        "tobeolRank": 1,
+        "raidRankAdvantage": 0,
+        "tobeolValue": 250000000000
+      }
+    ]
+  }
+]

@@ -1,0 +1,31 @@
+{
+  "name": "chungju-guild-dashboard",
+  "version": "2.1.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "collect": "node scripts/collect-data.js",
+    "collect:all": "GUILD_NAMES=충주시 MEMBER_LIMIT=120 node scripts/collect-data.js",
+    "collect:chungju": "GUILD_NAMES=충주시 MEMBER_LIMIT=120 node scripts/collect-data.js",
+    "serve": "node scripts/serve.js",
+    "collect:contents": "GUILD_CONTENT_NAMES=충주시 node scripts/collect-guild-contents.js",
+    "collect:hotdeals": "node scripts/collect-hotdeals.js",
+    "collect:all-data": "npm run collect:all && npm run collect:contents && npm run collect:hotdeals",
+    "collect:mgf": "npm run collect:chungju",
+    "collect:dashboard": "npm run collect:all-data",
+    "test": "node --test scripts/mgf-parser.test.js",
+    "diagnose": "node scripts/diagnose-source.js",
+    "verify": "npm test && npm run cf:build",
+    "cf:login": "node scripts/cloudflare-pages.js login",
+    "cf:whoami": "npx wrangler whoami",
+    "cf:create": "node scripts/cloudflare-pages.js create",
+    "cf:deploy": "node scripts/cloudflare-pages.js deploy",
+    "cf:open": "node scripts/cloudflare-pages.js open",
+    "cf:tail": "node scripts/cloudflare-pages.js tail",
+    "cf:setup": "node scripts/cloudflare-pages.js setup",
+    "cf:build": "node scripts/cloudflare-pages.js build"
+  },
+  "devDependencies": {
+    "wrangler": "latest"
+  }
+}
