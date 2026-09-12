@@ -82,6 +82,37 @@ export function parseGuildContentHtml(html, { keyword = "" } = {}) {
   };
 }
 
+export function parseServerRankingHtml(html, { kind = "power" } = {}) {
+  const source = String(html || "");
+  const rows = [];
+  const rowRegex = /<tr\b[^>]*>([\s\S]*?)<\/tr>/gi;
+  let rowMatch;
+  while ((rowMatch = rowRegex.exec(source)) !== null) {
+    const row = rowMatch[1];
+    const nickname = textByClass(row, "nickname");
+    if (!nickname) continue;
+    const rankWorldTag = findOpeningTagsByClass(row, "rank-world")[0]?.openingTag || "";
+    const rankTitle = attribute(rankWorldTag, "title");
+    const server = textByClass(row, "server-badge");
+    const serverId = (rankTitle.match(/(\d+)\s*서버/) || server.match(/(\d+)\s*$/) || [])[1] || "";
+    const metricText = kind === "raid"
+      ? textByClass(row, "score-tooltip") || textByClass(row, "score-kor")
+      : textByClass(row, "power-tooltip") || textByClass(row, "power-kor");
+    rows.push({
+      nickname,
+      guild: anchorTextByClass(row, "badge-guild"),
+      server,
+      serverId,
+      serverRank: integerFromText(textByClass(row, "rank-world")),
+      displayedRank: integerFromText(textByClass(row, "rank-total")),
+      metricText,
+      metricValue: metricText ? parseKoreanPowerValue(metricText) : null,
+      kind
+    });
+  }
+  return rows;
+}
+
 export function getRaidPeriod(dateString) {
   const sourceDate = normalizeDate(dateString) || kstDateString();
   const date = new Date(`${sourceDate}T00:00:00.000Z`);

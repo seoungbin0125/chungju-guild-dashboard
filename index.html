@@ -3,15 +3,15 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>충주시 길드 운영실 v2.1.0</title>
+  <title>충주시 길드 운영실 v2.2.0</title>
   <meta name="theme-color" content="#073b4c" />
-  <link rel="stylesheet" href="src/style.css?v=2.1.0" />
+  <link rel="stylesheet" href="src/style.css?v=2.2.0" />
 </head>
 <body>
   <main class="page">
     <section class="hero">
       <div>
-        <p class="eyebrow">Chungju Guild Operations <span class="version-pill">v2.1.0</span></p>
+        <p class="eyebrow">Chungju Guild Operations <span class="version-pill">v2.2.0</span></p>
         <h1 id="title">충주시 길드 운영실</h1>
         <p id="subtitle" class="hidden-subtitle"></p>
       </div>
@@ -72,21 +72,21 @@
         <div class="rank-compare-header">
           <div>
             <p class="eyebrow mini">Power vs. Raid Ranking</p>
-            <h2>투력·토벌 순위 비교</h2>
-            <p>길드 내 투력 순위와 토벌 순위를 같은 길드원 기준으로 비교합니다.</p>
+            <h2>서버 투력·토벌 순위 비교</h2>
+            <p>Scania 4 서버 전체의 투력 순위와 토벌 순위를 길드원별로 비교합니다.</p>
           </div>
           <label class="rank-sort-control">
             정렬
             <select id="rank-compare-sort">
-              <option value="tobeol">토벌 순위순</option>
-              <option value="power">투력 순위순</option>
-              <option value="advantage">토벌 순위 상승순</option>
+              <option value="tobeol">서버 토벌 순위순</option>
+              <option value="power">서버 투력 순위순</option>
+              <option value="advantage">서버 토벌 순위 상승순</option>
             </select>
           </label>
         </div>
         <div class="rank-compare-summary" id="rank-compare-summary"></div>
         <div class="rank-compare-list" id="rank-compare-list"></div>
-        <p class="rank-compare-legend">순위 차이가 +이면 토벌 순위가 투력 순위보다 높고, −이면 낮습니다. 토벌 0점은 미참여로 표시합니다.</p>
+        <p class="rank-compare-legend">MGF의 Scania 4 서버 순위(S)를 사용합니다. 순위 차이가 +이면 토벌 순위가 투력 순위보다 높고, −이면 낮습니다. 토벌 0점은 미참여로 표시합니다.</p>
       </section>
     </section>
 
@@ -223,7 +223,7 @@
         <div>
           <p class="eyebrow mini">Source-fresh Guild Boss Check</p>
           <h2>토벌전 원본 즉시 조회</h2>
-          <p class="muted">길드 상세의 길드원별 토벌 원본값을 직접 읽어 빠르고 정확하게 참여 여부를 확인합니다.</p>
+          <p class="muted">길드 상세의 토벌 원본값과 저장된 Scania 4 서버 순위를 함께 확인합니다.</p>
         </div>
         <div class="live-tobeol-form">
           <label>
@@ -240,7 +240,7 @@
       </section>
 
       <section class="live-tobeol-notice">
-        <strong>서버 전체 랭킹 결합 없이 길드 상세의 <code>data-gb</code>를 직접 확인합니다.</strong>
+        <strong>점수는 길드 상세의 <code>data-gb</code>, 순위는 MGF의 Scania 4 서버 랭킹을 사용합니다.</strong>
         <p>월요일은 지난주 확정, 화~일은 이번 주 진행 점수로 자동 표기합니다.</p>
       </section>
 
@@ -250,15 +250,15 @@
         <article class="live-tobeol-panel unified">
           <div class="panel-header compact">
             <div>
-              <h2>토벌전 현황 · 투력 순위 비교</h2>
-              <p>길드원 전체의 투력 순위와 토벌 순위 차이를 함께 표시합니다.</p>
+              <h2>토벌전 현황 · 서버 순위 비교</h2>
+              <p>길드원별 Scania 4 서버 투력 순위와 서버 토벌 순위 차이를 표시합니다.</p>
             </div>
             <label class="live-rank-sort-control">
               정렬
               <select id="live-rank-sort">
-                <option value="tobeol">토벌 순위순</option>
-                <option value="power">투력 순위순</option>
-                <option value="advantage">토벌 순위 상승순</option>
+                <option value="tobeol">서버 토벌 순위순</option>
+                <option value="power">서버 투력 순위순</option>
+                <option value="advantage">서버 토벌 순위 상승순</option>
               </select>
             </label>
           </div>
@@ -274,7 +274,7 @@
         <div>
           <p class="eyebrow mini">Guild Contents</p>
           <h2>길드 컨텐츠 매칭 현황</h2>
-          <p class="muted">대항전, 수련장, 보스대전의 실제 매칭 카드를 수집합니다. 점수가 원본에 없으면 미제공으로 표시합니다.</p>
+          <p class="muted">대항전 개인 점수를 주차별로 보관해 지난주 대비 증감·상승률을 보여주고, 매칭 길드도 함께 수집합니다.</p>
         </div>
         <div class="contents-actions">
           <label>
@@ -292,6 +292,23 @@
       </section>
 
       <section class="contents-summary" id="contents-summary"></section>
+      <section class="guild-war-member-panel" id="guild-war-member-panel">
+        <div class="guild-war-member-header">
+          <div>
+            <p class="eyebrow mini">Individual Guild War Ledger</p>
+            <h2>개인 대항전 점수 · 지난주 비교</h2>
+            <p>공개된 개인 점수만 정확히 기록합니다. 제출되지 않은 값은 0점이 아니라 미수집입니다.</p>
+          </div>
+          <a class="secondary-btn" id="guild-war-source-link" href="https://www.msidle.gg/guilds/scania/%EC%B6%A9%EC%A3%BC%EC%8B%9C/guild-war" target="_blank" rel="noopener noreferrer">개인점수 원본</a>
+        </div>
+        <div class="guild-war-summary" id="guild-war-summary"></div>
+        <div class="guild-war-list" id="guild-war-list"></div>
+        <p class="guild-war-notice" id="guild-war-notice"></p>
+      </section>
+      <div class="contents-section-title" id="contents-match-heading">
+        <div><span>Match Group</span><h2>매칭 길드 목록</h2></div>
+        <p>MGF 공개 매칭 카드 기준</p>
+      </div>
       <section class="contents-grid" id="contents-grid" aria-label="길드 컨텐츠 매칭 목록"></section>
     </section>
 
@@ -355,7 +372,7 @@
     </nav>
 
     <footer class="hidden-footer">
-      <span id="footer-text">데이터 로딩 중...</span><span class="footer-version">v2.1.0</span>
+      <span id="footer-text">데이터 로딩 중...</span><span class="footer-version">v2.2.0</span>
     </footer>
   </main>
 
@@ -476,6 +493,6 @@
     </form>
   </dialog>
 
-  <script type="module" src="src/main.js?v=2.1.0"></script>
+  <script type="module" src="src/main.js?v=2.2.0"></script>
 </body>
 </html>

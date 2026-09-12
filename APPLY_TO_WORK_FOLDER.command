@@ -9,10 +9,10 @@ if [ "$SOURCE_DIR" = "$TARGET_DIR" ]; then
 fi
 
 mkdir -p "$TARGET_DIR"
-rsync -av --delete \
+rsync -av \
   --exclude ".git" \
   --exclude "node_modules" \
   "$SOURCE_DIR/" "$TARGET_DIR/"
 
 echo "적용 완료: $TARGET_DIR"
-echo "버전: v2.1.0"
+echo "버전: v2.2.0"

@@ -6,7 +6,8 @@ import {
   findRaidSnapshot,
   getRaidPeriod,
   parseGuildContentHtml,
-  parseGuildInfoHtml
+  parseGuildInfoHtml,
+  parseServerRankingHtml
 } from "./mgf-parser.js";
 
 test("길드 내 전투력 순위와 토벌 순위를 비교하고 0점은 미참여로 둔다", () => {
@@ -95,4 +96,17 @@ test("전투력 7일 비교는 누락일이 있어도 목표일 근처 2일 이�
     { guild: "충주시", sourceDataDate: "2026-08-27", members: [] }
   ];
   assert.equal(findPowerComparisonSnapshot(history, "충주시", "2026-09-02")?.sourceDataDate, "2026-09-01");
+});
+
+test("랭킹 행에서 전체 표시 순위와 Scania 서버 내 순위를 구분한다", () => {
+  const html = `
+    <table><tr><td><span class="rank-total">3366</span><span class="rank-world" title="4 서버 내 토벌전 순위">S71</span></td>
+      <td><span class="nickname">그만해주세요</span><a class="badge-guild">충주시</a></td>
+      <td><span class="server-badge">Scania 4</span></td><td><span class="score-tooltip">5885억 8989만</span></td></tr></table>`;
+  const [row] = parseServerRankingHtml(html, { kind: "raid" });
+  assert.equal(row.displayedRank, 3366);
+  assert.equal(row.serverRank, 71);
+  assert.equal(row.serverId, "4");
+  assert.equal(row.nickname, "그만해주세요");
+  assert.equal(row.guild, "충주시");
 });

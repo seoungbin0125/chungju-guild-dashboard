@@ -36,6 +36,13 @@ jobs:
           GUILD_CONTENT_NAMES: 충주시
         run: npm run collect:contents
 
+      - name: Collect individual guild war scores
+        env:
+          GUILD_WAR_GUILD: 충주시
+          GUILD_WAR_WORLD: scania
+          GUILD_WAR_SERVER_ID: "4"
+        run: npm run collect:guild-war
+
       - name: Collect gift card hotdeals
         env:
           HOTDEAL_KEYWORD: 기프트카드
@@ -46,4 +53,4 @@ jobs:
         uses: stefanzweifel/git-auto-commit-action@v5
         with:
           commit_message: "chore: update dashboard data"
-          file_pattern: data/latest.json data/history.json data/guild-contents.json data/guild-contents-history.json data/hotdeals.json
+          file_pattern: data/latest.json data/history.json data/guild-contents.json data/guild-contents-history.json data/guild-war.json data/guild-war-history.json data/hotdeals.json

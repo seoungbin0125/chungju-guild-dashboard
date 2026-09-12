@@ -8858,7 +8858,7 @@ footer.hidden-footer { display: none !important; }
 
 .source-health {
   display: grid;
-  grid-template-columns: repeat(4, minmax(0, 1fr));
+  grid-template-columns: repeat(auto-fit, minmax(170px, 1fr));
   gap: 9px;
   margin-bottom: 12px;
 }
@@ -9117,7 +9117,7 @@ footer.hidden-footer { display: none !important; }
   .chungju-banner-copy strong { font-size: 2.3rem; }
 }
 
-/* v2.1.0 power-to-raid rank comparison */
+/* v2.2.0 Scania server power-to-raid rank comparison */
 .rank-compare-panel {
   margin-bottom: 14px;
   padding: 16px;
@@ -9246,4 +9246,140 @@ footer.hidden-footer { display: none !important; }
   .rank-compare-row > .rank-delta { grid-area: delta; justify-self: end; }
   .live-member-row { grid-template-columns: 28px 72px minmax(0, 1fr) 46px minmax(72px, .58fr) !important; }
   .live-member-row .featured-rank { width: 28px !important; }
+}
+
+/* v2.2.0 individual guild-war history */
+[hidden] { display: none !important; }
+
+.guild-war-member-panel {
+  margin: 12px 0 16px;
+  padding: 16px;
+  border: 1px solid #c9dedb;
+  border-radius: 24px;
+  background: linear-gradient(145deg, rgba(255,255,255,.98), rgba(232,247,243,.92));
+  box-shadow: var(--shadow-sm);
+}
+
+.guild-war-member-header,
+.contents-section-title {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 14px;
+}
+
+.guild-war-member-header { margin-bottom: 12px; }
+.guild-war-member-header h2,
+.contents-section-title h2 { margin: 0; color: var(--text); }
+.guild-war-member-header p:not(.eyebrow),
+.contents-section-title p { margin: 3px 0 0; color: var(--muted); font-size: .72rem; }
+
+.guild-war-summary {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 8px;
+  margin-bottom: 11px;
+}
+
+.guild-war-summary-card {
+  display: grid;
+  gap: 4px;
+  padding: 11px 12px;
+  border: 1px solid #d6e8e5;
+  border-radius: 15px;
+  background: rgba(255,255,255,.9);
+}
+
+.guild-war-summary-card span { color: var(--muted); font-size: .62rem; font-weight: 850; }
+.guild-war-summary-card strong { color: var(--text); font-size: .88rem; }
+.guild-war-summary-card.current { border-top: 3px solid #08788a; }
+.guild-war-summary-card.total { border-top: 3px solid #159786; }
+.guild-war-summary-card.previous { border-top: 3px solid #6687a5; }
+.guild-war-summary-card.growth { border-top: 3px solid #e98c55; }
+
+.guild-war-list {
+  display: grid;
+  gap: 6px;
+  max-height: 720px;
+  overflow: auto;
+}
+
+.guild-war-list-head,
+.guild-war-member-row {
+  display: grid;
+  grid-template-columns: minmax(150px, 1.1fr) minmax(180px, 1.2fr) minmax(145px, .9fr) minmax(115px, .72fr) minmax(75px, .5fr);
+  align-items: center;
+  gap: 10px;
+}
+
+.guild-war-list-head {
+  padding: 0 12px 4px;
+  color: var(--muted);
+  font-size: .61rem;
+  font-weight: 900;
+}
+
+.guild-war-member-row {
+  padding: 10px 12px;
+  border: 1px solid #dceae8;
+  border-radius: 14px;
+  background: #fff;
+}
+
+.guild-war-member-row.is-missing { background: rgba(248,251,250,.74); }
+.guild-war-member-name { display: flex; align-items: center; gap: 8px; min-width: 0; }
+.guild-war-member-name span { display: grid; min-width: 30px; height: 26px; place-items: center; border-radius: 9px; color: #fff; background: #456d74; font-size: .62rem; font-weight: 900; }
+.guild-war-member-name strong { overflow: hidden; color: var(--text); font-size: .8rem; text-overflow: ellipsis; white-space: nowrap; }
+.guild-war-score { min-width: 0; }
+.guild-war-score strong { display: block; overflow: hidden; color: #075f66; font-size: .77rem; text-overflow: ellipsis; white-space: nowrap; }
+.guild-war-score small { display: block; overflow: hidden; margin-top: 2px; color: var(--muted); font-size: .56rem; text-overflow: ellipsis; white-space: nowrap; }
+.guild-war-score.missing strong { color: #849698; }
+.guild-war-growth,
+.guild-war-rate { font-size: .72rem; white-space: nowrap; }
+.guild-war-growth.up,
+.guild-war-rate.up { color: #087565; }
+.guild-war-growth.down,
+.guild-war-rate.down { color: #b65f37; }
+.guild-war-growth.same,
+.guild-war-rate.same { color: #526f74; }
+.guild-war-growth.unknown,
+.guild-war-rate.unknown { color: #91a3a6; }
+.guild-war-notice { margin: 10px 2px 0; color: var(--muted); font-size: .61rem; line-height: 1.5; }
+.guild-war-empty { padding: 18px; border: 1px dashed #bfd7d3; border-radius: 14px; color: var(--muted); text-align: center; font-size: .72rem; }
+
+.contents-section-title {
+  margin: 18px 2px 9px;
+  padding-top: 4px;
+}
+
+.contents-section-title span {
+  display: block;
+  color: var(--primary);
+  font-size: .58rem;
+  font-weight: 900;
+  letter-spacing: .12em;
+  text-transform: uppercase;
+}
+
+@media (max-width: 900px) {
+  .guild-war-summary { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+}
+
+@media (max-width: 640px) {
+  .guild-war-member-panel { padding: 12px; border-radius: 20px; }
+  .guild-war-member-header { display: grid; align-items: start; }
+  .guild-war-member-header .secondary-btn { justify-self: start; }
+  .guild-war-list-head { display: none; }
+  .guild-war-member-row {
+    grid-template-columns: minmax(0, 1fr) minmax(100px, .9fr) 60px;
+    grid-template-areas: "member current rate" "previous growth rate";
+    gap: 8px;
+    padding: 10px;
+  }
+  .guild-war-member-name { grid-area: member; }
+  .guild-war-score.current { grid-area: current; }
+  .guild-war-score.previous { grid-area: previous; }
+  .guild-war-growth { grid-area: growth; }
+  .guild-war-rate { grid-area: rate; justify-self: end; }
+  .contents-section-title { align-items: flex-start; }
 }

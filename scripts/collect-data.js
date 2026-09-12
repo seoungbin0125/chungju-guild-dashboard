@@ -2,7 +2,6 @@ import fs from "node:fs/promises";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 import {
-  addMemberRankComparison,
   addDays,
   findPowerComparisonSnapshot,
   findRaidSnapshot,
@@ -12,6 +11,7 @@ import {
   parseGuildInfoHtml,
   parseKoreanPowerValue
 } from "./mgf-parser.js";
+import { fetchServerMemberRanks } from "./mgf-server-ranks.js";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -72,6 +72,25 @@ async function run() {
   const allHistory = await readJsonFile(HISTORY_PATH, []);
   const history = (Array.isArray(allHistory) ? allHistory : []).filter((snapshot) => guildNames.includes(snapshot?.guild));
   const manual = await readJsonFile(MANUAL_PATH, null);
+  const serverRanksByGuild = Object.fromEntries(await Promise.all(guildResults.map(async (result) => {
+    try {
+      const ranks = await fetchServerMemberRanks({
+        serverId: result.parsed.serverId,
+        guild: result.guild,
+        members: result.members,
+        sourceBase: SOURCE_BASE
+      });
+      console.log(`✅ ${result.guild} 서버 순위: 투력 ${ranks.diagnostics.power.foundCount}/${ranks.diagnostics.power.expectedCount}명 · 토벌 ${ranks.diagnostics.raid.foundCount}/${ranks.diagnostics.raid.expectedCount}명`);
+      return [result.guild, ranks];
+    } catch (error) {
+      console.warn(`⚠️ ${result.guild} 서버 순위 수집 실패: ${error.message}`);
+      return [result.guild, {
+        powerByNickname: {},
+        raidByNickname: {},
+        diagnostics: { scope: result.parsed.serverName || `Scania ${result.parsed.serverId}`, available: false, error: error.message }
+      }];
+    }
+  })));
   let mergedMembers = [];
   const comparisonDates = {};
   const raidHistoryByGuild = {};
@@ -79,6 +98,7 @@ async function run() {
 
   for (const result of guildResults) {
     const { guild, members, sourceUrl, sourceDataDate, raidPeriod } = result;
+    const serverRanks = serverRanksByGuild[guild] || { powerByNickname: {}, raidByNickname: {} };
     const powerTargetDate = addDays(sourceDataDate, -7);
     const powerSnapshot = findPowerComparisonSnapshot(history, guild, powerTargetDate, 2);
     const powerMap = memberMap(powerSnapshot);
@@ -130,6 +150,13 @@ async function run() {
       const powerGrowthValue = previousPower
         ? Number(member.powerValue || 0) - Number(previousPower.powerValue || 0)
         : null;
+      const serverPowerRank = positiveInteger(serverRanks.powerByNickname?.[member.nickname]);
+      const serverTobeolRank = sourceTobeolValue > 0
+        ? positiveInteger(serverRanks.raidByNickname?.[member.nickname])
+        : null;
+      const serverRaidRankAdvantage = serverPowerRank != null && serverTobeolRank != null
+        ? serverPowerRank - serverTobeolRank
+        : null;
 
       mergedMembers.push({
         guild,
@@ -161,21 +188,28 @@ async function run() {
         previousTobeolText: lastWeekTobeolValue == null ? null : formatKoreanPower(lastWeekTobeolValue),
         tobeolGrowthValue: null,
         tobeolGrowthText: null,
-        tobeolGrowthRate: null
+        tobeolGrowthRate: null,
+        rankScope: "server",
+        serverName: result.parsed.serverName || `Scania ${result.parsed.serverId}`,
+        serverPowerRank,
+        serverTobeolRank,
+        serverRaidRankAdvantage,
+        powerRank: serverPowerRank,
+        tobeolRank: serverTobeolRank,
+        raidRankAdvantage: serverRaidRankAdvantage
       });
     }
   }
 
   const manualAppliedCount = applyManualOverrides(mergedMembers, manual, capturedDate);
-  mergedMembers = addMemberRankComparison(mergedMembers);
   const summary = buildSummary(mergedMembers);
   const memberChanges = buildMemberChanges(guildNames, mergedMembers, departedMembers);
   const primaryPeriod = guildResults[0]?.raidPeriod || getRaidPeriod(capturedDate);
 
   const latest = {
     ok: true,
-    version: 7,
-    appVersion: "v2.1.0",
+    version: 8,
+    appVersion: "v2.2.0",
     guilds: guildNames,
     guild: guildNames.join(" · "),
     capturedDate,
@@ -205,9 +239,11 @@ async function run() {
       memberPower: { available: true, field: "data-bp", precision: "raw_integer_preserved" },
       raidScore: { available: true, field: "data-gb", periodAware: true },
       guildRankComparison: {
-        available: true,
-        fields: ["powerRank", "tobeolRank", "raidRankAdvantage"],
-        scope: "within_guild",
+        available: Object.values(serverRanksByGuild).some((item) => item?.diagnostics?.power?.foundCount > 0 || item?.diagnostics?.raid?.foundCount > 0),
+        fields: ["serverPowerRank", "serverTobeolRank", "serverRaidRankAdvantage"],
+        aliases: ["powerRank", "tobeolRank", "raidRankAdvantage"],
+        scope: "server",
+        source: "MGF ranking rank-world",
         zeroRaidPolicy: "unranked"
       },
       guildUpgradeToday: {
@@ -215,11 +251,15 @@ async function run() {
         reason: "MGF 공개 길드 상세 페이지에 업그레이드/건물 활동 필드가 없습니다."
       },
       guildCompetitionScore: {
-        available: false,
-        reason: "MGF 공개 매칭 페이지는 현재 매칭 그룹만 제공하며 점수 필드는 노출하지 않습니다."
+        available: true,
+        source: "msidle.gg public guild-war page",
+        limitation: "사용자 제출 기반이므로 미수집 값은 0점이 아니라 null로 유지합니다."
       }
     },
-    collectionDiagnostics: Object.fromEntries(guildResults.map((item) => [item.guild, item.validation])),
+    collectionDiagnostics: Object.fromEntries(guildResults.map((item) => [item.guild, {
+      ...item.validation,
+      serverRanks: serverRanksByGuild[item.guild]?.diagnostics || null
+    }])),
     summary,
     manualAppliedCount,
     memberChanges,
@@ -247,10 +287,15 @@ async function run() {
         level: member.level,
         powerValue: member.powerValue,
         powerRaw: member.powerRaw,
+        rankScope: member.rankScope,
+        serverName: member.serverName,
+        serverPowerRank: member.serverPowerRank,
         powerRank: member.powerRank,
         sourceTobeolValue: member.sourceTobeolValue,
         sourceTobeolRaw: member.sourceTobeolRaw,
+        serverTobeolRank: member.serverTobeolRank,
         tobeolRank: member.tobeolRank,
+        serverRaidRankAdvantage: member.serverRaidRankAdvantage,
         raidRankAdvantage: member.raidRankAdvantage,
         tobeolValue: member.sourceTobeolValue
       }))
@@ -263,7 +308,7 @@ async function run() {
 
 async function fetchHtml(url) {
   const response = await fetch(url, {
-    headers: { "user-agent": "Mozilla/5.0 (compatible; Chungju-Guild-Dashboard/2.1)" }
+    headers: { "user-agent": "Mozilla/5.0 (compatible; Chungju-Guild-Dashboard/2.2)" }
   });
   if (!response.ok) throw new Error(`MGF 조회 실패 ${response.status}: ${url}`);
   return response.text();
@@ -406,6 +451,11 @@ function memberKey(guild, nickname) {
 
 function nullableNumber(value) {
   return value == null || value === "" ? null : Number(value);
+}
+
+function positiveInteger(value) {
+  const number = Number(value);
+  return Number.isInteger(number) && number > 0 ? number : null;
 }
 
 function calcGrowthRate(current, previous) {

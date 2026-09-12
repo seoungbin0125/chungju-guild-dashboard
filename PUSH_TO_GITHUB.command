@@ -32,7 +32,7 @@ fi
 git branch -M main
 git add .
 if ! git diff --cached --quiet; then
-  git commit -m "feat: launch Chungju guild dashboard v2.1.0"
+  git commit -m "feat: launch Chungju guild dashboard v2.2.0"
 fi
 
 if git remote get-url origin >/dev/null 2>&1; then

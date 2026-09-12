@@ -3,7 +3,7 @@
 이 프로젝트의 권장 운영 흐름은 다음과 같습니다.
 
 ```text
-MGF → GitHub Actions 정기 수집 → data/*.json 커밋 → Cloudflare Pages 자동 재배포
+MGF·개인점수 공개 페이지 → GitHub Actions 정기 수집 → data/*.json 커밋 → Cloudflare Pages 자동 재배포
                                       └→ Pages Function /api/tobeol 실시간 조회
 ```
 
@@ -29,11 +29,16 @@ macOS가 실행을 막으면 파일을 우클릭하고 **열기**를 선택합�
 4. 이름은 `chungju-guild-dashboard`, 브랜치는 `main`으로 둡니다.
 5. `Publish repository`를 누릅니다. 공개할 필요가 없으면 `Keep this code private`를 체크합니다.
 
+### 이미 연결된 GitHub 저장소 업데이트
+
+이 버전의 파일을 기존 `chungju-guild-dashboard` 폴더에 적용한 뒤 `PUSH_UPDATE_TO_GITHUB.command`를 더블클릭합니다. 변경 파일 커밋과 `main` 푸시가 끝나면 연결된 Cloudflare Pages가 자동 배포를 시작합니다.
+
 ## 2. GitHub Actions 자동 스크래핑 켜기
 
 프로젝트에 이미 다음 워크플로가 들어 있습니다.
 
-- `.github/workflows/collect.yml`: 매일 한국시간 02:10 길드·콘텐츠·핫딜 갱신
+- `.github/workflows/collect.yml`: 매일 한국시간 02:10 길드·서버 순위·개인 대항전·콘텐츠·핫딜 갱신
+- `.github/workflows/collect-guild-war.yml`: 매일 한국시간 23:45 개인 대항전 점수와 주차 이력 추가 보존
 - `.github/workflows/collect-hotdeals.yml`: 매시간 17분 핫딜 갱신
 
 GitHub 저장소에서 다음을 확인합니다.
@@ -41,7 +46,7 @@ GitHub 저장소에서 다음을 확인합니다.
 1. `Actions` 탭을 열고 워크플로 사용을 허용합니다.
 2. `Collect Dashboard Data`를 선택합니다.
 3. `Run workflow → Run workflow`를 눌러 첫 수집을 직접 실행합니다.
-4. 실행 완료 후 `data/latest.json`에 새 커밋이 생겼는지 확인합니다.
+4. 실행 완료 후 `data/latest.json`과 `data/guild-war-history.json`에 새 커밋이 생겼는지 확인합니다.
 
 자동 커밋이 `403`으로 실패하는 경우:
 
@@ -49,7 +54,7 @@ GitHub 저장소에서 다음을 확인합니다.
 2. `Workflow permissions`에서 `Read and write permissions`를 선택합니다.
 3. 저장한 뒤 워크플로를 다시 실행합니다.
 
-스크래핑은 OCR을 사용하지 않습니다. MGF 길드 상세의 `data-bp`(전투력)와 `data-gb`(토벌)를 직접 읽고, 합계 검증에 실패하면 잘못된 데이터를 커밋하지 않습니다.
+스크래핑은 OCR을 사용하지 않습니다. MGF 길드 상세의 `data-bp`(전투력), `data-gb`(토벌), 서버 랭킹의 `rank-world`를 직접 읽습니다. 개인 대항전은 공개 JSON의 개인별 점수·제출 시각을 주차별로 저장합니다.
 
 ## 3. Cloudflare Pages에 서버 배포
 
@@ -91,20 +96,29 @@ npm run cf:deploy
 
 GitHub 연동 방식과 Wrangler 직접 업로드 방식은 Cloudflare 프로젝트 생성 시 운영 방식이 갈릴 수 있으므로, 새 프로젝트라면 위의 GitHub 연동 방식을 권장합니다.
 
-## 4. 순위 비교 기능 기준
+## 4. 서버 순위 비교 기능 기준
 
-- 전투력 순위: 길드원 `data-bp` 원본 정수 내림차순
-- 토벌 순위: `data-gb`가 1 이상인 참여자만 내림차순
-- 동점: 공동 순위 방식 `1, 2, 2, 4`
+- 전투력 순위: MGF 전투력 랭킹의 Scania 4 `S순위`
+- 토벌 순위: MGF 토벌 랭킹의 Scania 4 `S순위`
+- 결합 조건: 닉네임, 길드명, 서버 번호가 모두 일치
 - 토벌 0점: 순위를 부여하지 않고 `미참여`
-- 순위 차이: `전투력 순위 - 토벌 순위`
+- 순위 차이: `서버 전투력 순위 - 서버 토벌 순위`
   - `+3`: 토벌 순위가 투력 순위보다 3칸 높음
   - `0`: 두 순위가 같음
   - `-3`: 토벌 순위가 투력 순위보다 3칸 낮음
 
-대시보드의 `투력·토벌 순위 비교`에서 토벌 순위, 투력 순위, 토벌 순위 상승 폭으로 정렬할 수 있습니다. `토벌전` 화면의 실시간 조회 결과에도 같은 비교가 표시됩니다.
+대시보드의 `투력·토벌 순위 비교`에서 서버 토벌 순위, 서버 투력 순위, 순위 상승 폭으로 정렬할 수 있습니다. 실시간 토벌 조회에는 가장 최근 정기 수집에서 저장한 서버 순위를 결합합니다.
 
-## 5. 문제 확인 명령어
+## 5. 개인 대항전 주간 기록 기준
+
+- `npm run collect:guild-war`가 개인별 공개 점수와 제출 시각을 읽습니다.
+- 목요일(KST)을 새 주차 시작으로 사용합니다.
+- `data/guild-war-history.json`은 주차별 원본 정수를 보존합니다.
+- 이번 주와 지난주가 모두 있는 사람만 증감·상승률을 계산합니다.
+- 공개 소스가 사용자 제출 기반이므로 누락은 `0점`이 아니라 `미수집(null)`입니다.
+- 자동 수집을 켠 시점 이전의 누락 주차는 완전하게 소급 복구할 수 없습니다.
+
+## 6. 문제 확인 명령어
 
 ```bash
 npm test

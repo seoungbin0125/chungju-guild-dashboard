@@ -1,0 +1,39 @@
+name: Collect Individual Guild War Scores
+
+on:
+  workflow_dispatch:
+  schedule:
+    # 매일 KST 23:45 실행 = UTC 14:45. 수요일 마감 직전 기록도 보존합니다.
+    - cron: "45 14 * * *"
+
+permissions:
+  contents: write
+
+jobs:
+  collect-guild-war:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - name: Test guild war history parser
+        run: node --test scripts/guild-war-parser.test.js
+
+      - name: Collect individual guild war scores
+        env:
+          GUILD_WAR_GUILD: 충주시
+          GUILD_WAR_WORLD: scania
+          GUILD_WAR_SERVER_ID: "4"
+        run: npm run collect:guild-war
+
+      - name: Commit guild war history
+        uses: stefanzweifel/git-auto-commit-action@v5
+        with:
+          commit_message: "chore: update individual guild war scores"
+          file_pattern: data/guild-war.json data/guild-war-history.json
