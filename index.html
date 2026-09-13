@@ -3,15 +3,15 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>충주시 길드 운영실 v2.2.0</title>
+  <title>충주시 길드 운영실 v2.4.0</title>
   <meta name="theme-color" content="#073b4c" />
-  <link rel="stylesheet" href="src/style.css?v=2.2.0" />
+  <link rel="stylesheet" href="src/style.css?v=2.4.0" />
 </head>
 <body>
   <main class="page">
     <section class="hero">
       <div>
-        <p class="eyebrow">Chungju Guild Operations <span class="version-pill">v2.2.0</span></p>
+        <p class="eyebrow">Chungju Guild Operations <span class="version-pill">v2.4.0</span></p>
         <h1 id="title">충주시 길드 운영실</h1>
         <p id="subtitle" class="hidden-subtitle"></p>
       </div>
@@ -24,11 +24,12 @@
           <strong>충주시</strong>
           <p>호수처럼 한눈에, 주차별로 정확하게</p>
         </div>
-        <span class="banner-date" id="banner-source-date">MGF 데이터 확인 중</span>
+        <span class="banner-date" id="banner-source-date">길드 현황 확인 중</span>
       </div>
       <div class="main-nav desktop-nav" aria-label="메인 메뉴">
         <button class="main-tab active" data-page="dashboard" type="button">현황</button>
         <button class="main-tab" data-page="live-tobeol" type="button">토벌전</button>
+        <button class="main-tab" data-page="efficiency" type="button">효율</button>
         <button class="main-tab" data-page="contents" type="button">대항전</button>
         <button class="main-tab" data-page="guide" type="button">공략</button>
       </div>
@@ -37,14 +38,11 @@
     <section class="content-page active" id="page-dashboard">
       <section class="summary-grid" id="summary-grid"></section>
 
-      <section class="source-health" id="source-health" aria-label="자동 수집 가능 범위"></section>
-
-
       <section class="featured-panel">
         <div class="featured-header">
           <div>
             <h2>길드원 현황</h2>
-            <p>MGF 길드원 행의 전투력 원본값을 직접 읽고 실제 비교일과 함께 보여줍니다.</p>
+            <p>길드원의 전투력과 최근 변화를 한눈에 확인합니다.</p>
           </div>
           <div class="featured-controls">
             <button class="secondary-btn subtle-filter-btn" id="open-filter" type="button">필터</button>
@@ -61,7 +59,7 @@
           <div>
             <p class="eyebrow mini">Weekly raid ledger</p>
             <h2>주차별 토벌 기록</h2>
-            <p>이번 주 누적과 지난주 확정 기록을 섞지 않고 따로 관리합니다.</p>
+            <p>이번 주와 지난주 토벌 기록을 비교합니다.</p>
           </div>
           <span class="period-chip" id="raid-period-chip">주차 확인 중</span>
         </div>
@@ -86,7 +84,7 @@
         </div>
         <div class="rank-compare-summary" id="rank-compare-summary"></div>
         <div class="rank-compare-list" id="rank-compare-list"></div>
-        <p class="rank-compare-legend">MGF의 Scania 4 서버 순위(S)를 사용합니다. 순위 차이가 +이면 토벌 순위가 투력 순위보다 높고, −이면 낮습니다. 토벌 0점은 미참여로 표시합니다.</p>
+        <p class="rank-compare-legend">순위 차이가 +이면 토벌 순위가 투력 순위보다 높고, −이면 낮습니다. 토벌 0점은 미참여로 표시합니다.</p>
       </section>
     </section>
 
@@ -97,7 +95,7 @@
         <div>
           <p class="eyebrow mini">Character Gallery</p>
           <h2>길드 캐릭터 한눈에 보기</h2>
-          <p class="muted">MGF 캐릭터 이미지를 불러와 전투력, 토벌전 점수, 변화량을 카드로 같이 보여줍니다.</p>
+          <p class="muted">캐릭터와 전투력, 토벌전 점수, 변화량을 카드로 같이 보여줍니다.</p>
         </div>
         <div class="visual-stats" id="visual-stats"></div>
       </section>
@@ -221,9 +219,9 @@
     <section class="content-page" id="page-live-tobeol">
       <section class="live-tobeol-hero">
         <div>
-          <p class="eyebrow mini">Source-fresh Guild Boss Check</p>
-          <h2>토벌전 원본 즉시 조회</h2>
-          <p class="muted">길드 상세의 토벌 원본값과 저장된 Scania 4 서버 순위를 함께 확인합니다.</p>
+          <p class="eyebrow mini">Weekly Raid</p>
+          <h2>토벌전 현황</h2>
+          <p class="muted">길드원의 토벌 참여, 점수와 Scania 4 서버 순위를 확인합니다.</p>
         </div>
         <div class="live-tobeol-form">
           <label>
@@ -235,13 +233,7 @@
             <input id="live-tobeol-server" type="number" min="1" max="99" value="4" placeholder="자동 또는 4" />
           </label>
           <button class="primary-btn" id="live-tobeol-search" type="button">지금 조회</button>
-          <a class="secondary-btn" id="live-tobeol-source-link" href="https://mgf.gg/contents/guild_info.php?g_name=%EC%B6%A9%EC%A3%BC%EC%8B%9C" target="_blank" rel="noopener noreferrer">원본 열기</a>
         </div>
-      </section>
-
-      <section class="live-tobeol-notice">
-        <strong>점수는 길드 상세의 <code>data-gb</code>, 순위는 MGF의 Scania 4 서버 랭킹을 사용합니다.</strong>
-        <p>월요일은 지난주 확정, 화~일은 이번 주 진행 점수로 자동 표기합니다.</p>
       </section>
 
       <section class="live-tobeol-summary" id="live-tobeol-summary"></section>
@@ -269,19 +261,68 @@
     </section>
 
 
+    <section class="content-page" id="page-efficiency">
+      <section class="efficiency-hero">
+        <div>
+          <p class="eyebrow mini">Raid Efficiency</p>
+          <h2>토벌 효율 분석</h2>
+          <p>전투력 규모와 직업 차이를 함께 반영해 길드원별 토벌 성과를 비교합니다.</p>
+        </div>
+        <label class="efficiency-sort-control">
+          정렬
+          <select id="efficiency-sort">
+            <option value="efficiency">효율 높은순</option>
+            <option value="attention">점검 우선순</option>
+            <option value="score">실제점수 높은순</option>
+            <option value="power">전투력 높은순</option>
+          </select>
+        </label>
+      </section>
+
+      <section class="efficiency-grade-summary" id="efficiency-grade-summary"></section>
+      <section class="efficiency-highlights" id="efficiency-highlights"></section>
+
+      <section class="efficiency-panel">
+        <div class="efficiency-panel-header">
+          <div>
+            <h2>길드원 효율표</h2>
+            <p>현재 수집된 전투력과 토벌 점수를 기준으로 표시합니다.</p>
+          </div>
+          <span class="period-chip" id="efficiency-period">기준일 확인 중</span>
+        </div>
+        <div class="efficiency-table-wrap">
+          <div class="efficiency-table-head">
+            <span>순위</span><span>길드원</span><span>전투력</span><span>실제점수</span><span>기대점수</span><span>효율지수</span><span>판정</span>
+          </div>
+          <div class="efficiency-list" id="efficiency-list"></div>
+        </div>
+        <p class="efficiency-notice">길드 내부의 상대 비교 지표입니다. 참여 시간이나 프리셋 실수가 있었다면 다음 기록과 함께 확인해주세요.</p>
+      </section>
+
+      <section class="efficiency-job-panel">
+        <div class="efficiency-panel-header">
+          <div>
+            <h2>직업별 기준 멤버</h2>
+            <p>같은 직업에서 효율이 가장 높은 길드원을 확인합니다.</p>
+          </div>
+        </div>
+        <div class="efficiency-job-grid" id="efficiency-job-grid"></div>
+      </section>
+    </section>
+
+
     <section class="content-page" id="page-contents">
       <section class="contents-hero">
         <div>
           <p class="eyebrow mini">Guild Contents</p>
           <h2>길드 컨텐츠 매칭 현황</h2>
-          <p class="muted">대항전 개인 점수를 주차별로 보관해 지난주 대비 증감·상승률을 보여주고, 매칭 길드도 함께 수집합니다.</p>
+          <p class="muted">개인 점수와 지난주 변화, 이번 대항전 매칭 길드를 확인합니다.</p>
         </div>
         <div class="contents-actions">
           <label>
             검색 길드
             <select id="contents-guild-select"></select>
           </label>
-          <a class="secondary-btn contents-open-link" id="contents-source-link" href="https://mgf.gg/contents/guild.php?mode=league&amp;stx=%EC%B6%A9%EC%A3%BC%EC%8B%9C" target="_blank" rel="noopener noreferrer">원본에서 열기</a>
         </div>
       </section>
 
@@ -295,11 +336,11 @@
       <section class="guild-war-member-panel" id="guild-war-member-panel">
         <div class="guild-war-member-header">
           <div>
-            <p class="eyebrow mini">Individual Guild War Ledger</p>
+            <p class="eyebrow mini">Weekly Guild War</p>
             <h2>개인 대항전 점수 · 지난주 비교</h2>
-            <p>공개된 개인 점수만 정확히 기록합니다. 제출되지 않은 값은 0점이 아니라 미수집입니다.</p>
+            <p>이번 주 참여 점수와 지난주 기록을 길드원별로 비교합니다.</p>
           </div>
-          <a class="secondary-btn" id="guild-war-source-link" href="https://www.msidle.gg/guilds/scania/%EC%B6%A9%EC%A3%BC%EC%8B%9C/guild-war" target="_blank" rel="noopener noreferrer">개인점수 원본</a>
+          <button class="primary-btn guild-war-input-open" id="open-guild-war-input" type="button">개인 점수 입력</button>
         </div>
         <div class="guild-war-summary" id="guild-war-summary"></div>
         <div class="guild-war-list" id="guild-war-list"></div>
@@ -307,7 +348,7 @@
       </section>
       <div class="contents-section-title" id="contents-match-heading">
         <div><span>Match Group</span><h2>매칭 길드 목록</h2></div>
-        <p>MGF 공개 매칭 카드 기준</p>
+        <p>현재 대항전 편성</p>
       </div>
       <section class="contents-grid" id="contents-grid" aria-label="길드 컨텐츠 매칭 목록"></section>
     </section>
@@ -317,10 +358,10 @@
         <div>
           <p class="eyebrow mini">Gift Card Deals</p>
           <h2>기프트카드 할인 소식</h2>
-          <p class="muted">아카라이브 핫딜 게시판에서 기프트카드 키워드로 수집한 글을 보여줍니다. 마감 여부가 애매하면 최신 5개 기준으로 표시합니다.</p>
+          <p class="muted">기프트카드 할인 소식과 마감 여부를 확인합니다.</p>
         </div>
         <div class="hotdeal-actions">
-          <a class="secondary-btn hotdeal-open-link" id="hotdeal-source-link" href="https://arca.live/b/hotdeal?target=all&amp;keyword=%EA%B8%B0%ED%94%84%ED%8A%B8%EC%B9%B4%EB%93%9C" target="_blank" rel="noopener noreferrer">원본 방 열기</a>
+          <a class="secondary-btn hotdeal-open-link" id="hotdeal-source-link" href="https://arca.live/b/hotdeal?target=all&amp;keyword=%EA%B8%B0%ED%94%84%ED%8A%B8%EC%B9%B4%EB%93%9C" target="_blank" rel="noopener noreferrer">핫딜 게시판 열기</a>
         </div>
       </section>
 
@@ -367,12 +408,13 @@
     <nav class="bottom-mobile-nav" aria-label="하단 메뉴">
       <button class="main-tab active bottom-tab" data-page="dashboard" type="button"><span>🏠</span><b>현황</b></button>
       <button class="main-tab bottom-tab" data-page="live-tobeol" type="button"><span>⚔️</span><b>토벌전</b></button>
+      <button class="main-tab bottom-tab" data-page="efficiency" type="button"><span>📊</span><b>효율</b></button>
       <button class="main-tab bottom-tab" data-page="contents" type="button"><span>🧭</span><b>대항전</b></button>
       <button class="main-tab bottom-tab" data-page="guide" type="button"><span>📜</span><b>공략</b></button>
     </nav>
 
     <footer class="hidden-footer">
-      <span id="footer-text">데이터 로딩 중...</span><span class="footer-version">v2.2.0</span>
+      <span id="footer-text">데이터 로딩 중...</span><span class="footer-version">v2.4.0</span>
     </footer>
   </main>
 
@@ -414,7 +456,7 @@
         <div>
           <p class="eyebrow mini">Manual Edit</p>
           <h2>점수 수정</h2>
-          <p id="edit-desc">필요한 경우 전투력 비교값과 지난주 토벌 기록을 보정할 수 있습니다. 자동 수집 원본과 수동 보정 여부는 구분해 표시됩니다.</p>
+          <p id="edit-desc">필요한 경우 전투력과 토벌전 기록을 직접 수정할 수 있습니다.</p>
         </div>
         <button class="icon-btn" id="close-editor" type="button" aria-label="닫기">×</button>
       </div>
@@ -433,7 +475,7 @@
                 <th>닉네임</th>
                 <th>현재 전투력</th>
                 <th>7일 전 전투력</th>
-                <th>원본 토벌전</th>
+                <th>현재 토벌전</th>
                 <th>지난주 토벌전</th>
                 <th>메모</th>
               </tr>
@@ -441,6 +483,44 @@
             <tbody id="editor-body"></tbody>
           </table>
         </div>
+      </div>
+    </form>
+  </dialog>
+
+  <dialog class="edit-dialog guild-war-input-dialog" id="guild-war-input-dialog">
+    <form class="edit-card guild-war-input-card" method="dialog">
+      <div class="edit-header">
+        <div>
+          <p class="eyebrow mini">Weekly Score Entry</p>
+          <h2>대항전 개인 점수 입력</h2>
+          <p>이번 주 점수를 저장하면 다음 주에 지난주 기록으로 자동 연결됩니다.</p>
+        </div>
+        <button class="icon-btn" id="close-guild-war-input" type="button" aria-label="닫기">×</button>
+      </div>
+
+      <div class="guild-war-input-weeks">
+        <span>이번 주 <strong id="guild-war-input-current-week">-</strong></span>
+        <span>지난주 <strong id="guild-war-input-previous-week">-</strong></span>
+      </div>
+
+      <div class="guild-war-input-toolbar">
+        <label>
+          길드원 검색
+          <input id="guild-war-input-search" type="search" placeholder="닉네임" />
+        </label>
+        <label>
+          저장 비밀번호
+          <input id="guild-war-input-password" type="password" inputmode="numeric" autocomplete="off" placeholder="비밀번호" />
+        </label>
+        <button class="primary-btn" id="save-guild-war-input" type="button">점수 저장</button>
+      </div>
+
+      <p class="guild-war-input-help">점수는 숫자, 쉼표 또는 ‘1234억 5678만’처럼 입력할 수 있습니다. 빈칸은 미집계로 남습니다.</p>
+      <p class="edit-message" id="guild-war-input-message"></p>
+
+      <div class="guild-war-input-table-wrap">
+        <div class="guild-war-input-head"><span>길드원</span><span>이번 주 개인점수</span><span>지난주 개인점수</span></div>
+        <div class="guild-war-input-list" id="guild-war-input-list"></div>
       </div>
     </form>
   </dialog>
@@ -493,6 +573,6 @@
     </form>
   </dialog>
 
-  <script type="module" src="src/main.js?v=2.2.0"></script>
+  <script type="module" src="src/main.js?v=2.4.0"></script>
 </body>
 </html>

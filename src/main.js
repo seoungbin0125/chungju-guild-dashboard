@@ -1,7 +1,9 @@
 import { FIREBASE_COLLECTION, FIREBASE_CONFIG, FIREBASE_GAME_COLLECTION, FIREBASE_LOBBY_COLLECTION, FIREBASE_MANUAL_COLLECTION } from "./firebase-config.js";
 import { createGuideBoardClient, createJellyGameClient, createManualOverrideClient, createVirtualLobbyClient, isFirebaseConfigured } from "./firebase-board.js";
+import { calculateRaidEfficiency } from "./raid-efficiency.js";
+import { mergeGuildWarManualData, normalizeGuildWarScoreInput } from "./guild-war-manual.js";
 
-const APP_VERSION = "v2.2.0";
+const APP_VERSION = "v2.4.0";
 const LIVE_TOBEOL_API_ORIGIN = "https://chungju-guild-dashboard.pages.dev";
 const EDIT_PASSWORD = "5645";
 const LOCAL_MANUAL_KEY = "chungju-guild-dashboard.manual.v1";
@@ -10,6 +12,7 @@ const LOCAL_VIRTUAL_KEY = "chungju-guild-dashboard.virtual-user.v1";
 const LOCAL_CHAT_KEY = "chungju-guild-dashboard.virtual-chat.v1";
 const LOCAL_GAME_KEY = "chungju-guild-dashboard.jelly-user.v1";
 const LOCAL_GAME_EVENTS_KEY = "chungju-guild-dashboard.jelly-events.v1";
+const LOCAL_GUILD_WAR_MANUAL_KEY = "chungju-guild-dashboard.guild-war-manual.v1";
 const VIRTUAL_JAIL_MS = 5000;
 const VIRTUAL_ATTACK_COOLDOWN_MS = 1200;
 const VIRTUAL_ATTACK_RANGE = 16;
@@ -83,6 +86,14 @@ const state = {
   gameUserId: getOrCreateGameUserId(),
   guildContents: null,
   guildWar: null,
+  guildWarManualCurrent: null,
+  guildWarManualPrevious: null,
+  guildWarManualCurrentClient: null,
+  guildWarManualPreviousClient: null,
+  guildWarManualCurrentLoaded: false,
+  guildWarManualPreviousLoaded: false,
+  guildWarManualStore: null,
+  guildWarManualStatus: "",
   hotdeals: null,
   contentsGuild: "충주시",
   liveTobeolGuild: "충주시",
@@ -92,6 +103,7 @@ const state = {
   liveTobeolError: "",
   rankCompareSort: "tobeol",
   liveRankSort: "tobeol",
+  efficiencySort: "efficiency",
   contentsMode: "league",
   editorUnlocked: true
 };
@@ -101,7 +113,6 @@ const refs = {
   subtitle: document.getElementById("subtitle"),
   bannerSourceDate: document.getElementById("banner-source-date"),
   summaryGrid: document.getElementById("summary-grid"),
-  sourceHealth: document.getElementById("source-health"),
   raidPeriodChip: document.getElementById("raid-period-chip"),
   weeklyRaidList: document.getElementById("weekly-raid-list"),
   rankCompareSummary: document.getElementById("rank-compare-summary"),
@@ -167,15 +178,29 @@ const refs = {
   gameNudgeButtons: document.querySelectorAll("[data-game-move]"),
   contentsTabs: document.querySelectorAll(".contents-tab"),
   contentsGuildSelect: document.getElementById("contents-guild-select"),
-  contentsSourceLink: document.getElementById("contents-source-link"),
   contentsSummary: document.getElementById("contents-summary"),
   guildWarPanel: document.getElementById("guild-war-member-panel"),
   guildWarSummary: document.getElementById("guild-war-summary"),
   guildWarList: document.getElementById("guild-war-list"),
   guildWarNotice: document.getElementById("guild-war-notice"),
-  guildWarSourceLink: document.getElementById("guild-war-source-link"),
+  openGuildWarInput: document.getElementById("open-guild-war-input"),
+  guildWarInputDialog: document.getElementById("guild-war-input-dialog"),
+  closeGuildWarInput: document.getElementById("close-guild-war-input"),
+  guildWarInputCurrentWeek: document.getElementById("guild-war-input-current-week"),
+  guildWarInputPreviousWeek: document.getElementById("guild-war-input-previous-week"),
+  guildWarInputSearch: document.getElementById("guild-war-input-search"),
+  guildWarInputPassword: document.getElementById("guild-war-input-password"),
+  guildWarInputList: document.getElementById("guild-war-input-list"),
+  guildWarInputMessage: document.getElementById("guild-war-input-message"),
+  saveGuildWarInput: document.getElementById("save-guild-war-input"),
   contentsMatchHeading: document.getElementById("contents-match-heading"),
   contentsGrid: document.getElementById("contents-grid"),
+  efficiencySort: document.getElementById("efficiency-sort"),
+  efficiencyGradeSummary: document.getElementById("efficiency-grade-summary"),
+  efficiencyHighlights: document.getElementById("efficiency-highlights"),
+  efficiencyPeriod: document.getElementById("efficiency-period"),
+  efficiencyList: document.getElementById("efficiency-list"),
+  efficiencyJobGrid: document.getElementById("efficiency-job-grid"),
   liveTobeolGuild: document.getElementById("live-tobeol-guild"),
   liveTobeolServer: document.getElementById("live-tobeol-server"),
   liveTobeolSearch: document.getElementById("live-tobeol-search"),
@@ -183,7 +208,6 @@ const refs = {
   liveTobeolMissList: document.getElementById("live-tobeol-miss-list"),
   liveTobeolHitList: document.getElementById("live-tobeol-hit-list"),
   liveRankSort: document.getElementById("live-rank-sort"),
-  liveTobeolSourceLink: document.getElementById("live-tobeol-source-link"),
   hotdealSummary: document.getElementById("hotdeal-summary"),
   hotdealGrid: document.getElementById("hotdeal-grid"),
   hotdealSourceLink: document.getElementById("hotdeal-source-link"),
@@ -247,11 +271,13 @@ async function init() {
     state.localPosts = readLocalPosts();
     state.guildContents = normalizeGuildContents(guildContents);
     state.guildWar = normalizeGuildWar(guildWar);
+    state.guildWarManualStore = readLocalGuildWarManualStore();
     state.hotdeals = normalizeHotdeals(hotdeals);
     initFirebaseBoard();
     initManualClient();
     rebuildPosts();
     rebuildData();
+    initGuildWarManualClients();
     initGuildFilter();
     initVisualFilters();
     initVirtualPicker();
@@ -262,7 +288,7 @@ async function init() {
     if (refs.tableBody) {
       refs.tableBody.innerHTML = `<tr><td colspan="99" class="empty">${escapeHtml(error.message)}</td></tr>`;
     }
-    refs.footerText.textContent = `${APP_VERSION} · data/latest.json 파일을 확인해주세요.`;
+    refs.footerText.textContent = `${APP_VERSION} · 길드 정보를 불러오지 못했습니다.`;
   }
 }
 
@@ -378,6 +404,22 @@ function bindEvents() {
     renderGuildContentsPage();
   });
 
+  refs.efficiencySort?.addEventListener("change", (event) => {
+    state.efficiencySort = event.target.value || "efficiency";
+    renderEfficiencyPage();
+  });
+
+  refs.openGuildWarInput?.addEventListener("click", openGuildWarInput);
+  refs.closeGuildWarInput?.addEventListener("click", closeGuildWarInput);
+  refs.saveGuildWarInput?.addEventListener("click", saveGuildWarInput);
+  refs.guildWarInputSearch?.addEventListener("input", filterGuildWarInputRows);
+  refs.guildWarInputPassword?.addEventListener("keydown", (event) => {
+    if (event.key === "Enter") {
+      event.preventDefault();
+      saveGuildWarInput();
+    }
+  });
+
   refs.virtualCharacterSelect?.addEventListener("change", (event) => {
     state.virtualSelectedKey = event.target.value;
     if (state.virtualJoined) joinVirtualLobby(true);
@@ -475,6 +517,11 @@ function renderPage() {
 
   if (state.page === "live-tobeol") {
     renderLiveTobeolPage();
+    return;
+  }
+
+  if (state.page === "efficiency") {
+    renderEfficiencyPage();
     return;
   }
 
@@ -598,9 +645,6 @@ function renderGuildContentsPage() {
 
   const bundle = getSelectedGuildContentBundle();
   const modeData = bundle?.modes?.[state.contentsMode] || null;
-  const url = modeData?.url || makeGuildContentsUrl(state.contentsMode, state.contentsGuild);
-  if (refs.contentsSourceLink) refs.contentsSourceLink.href = url;
-
   renderGuildContentsSummary(bundle, modeData);
   renderGuildWarPanel();
   renderGuildContentsGrid(modeData);
@@ -617,15 +661,15 @@ function renderGuildContentsSummary(bundle, modeData) {
     const isActive = mode === state.contentsMode;
     const count = Number(item?.matchCount ?? item?.guilds?.length ?? 0);
     const topGuild = item?.guilds?.[0];
-    const warSummary = state.guildWar?.summary || {};
+    const warSummary = getEffectiveGuildWarData().summary || {};
     const availability = mode === "league"
       ? `개인점수 ${Number(warSummary.currentKnownCount || 0)}/${Number(warSummary.rosterCount || 0)}명`
-      : item?.scoreAvailable ? "점수 제공" : "매칭 카드 수집";
+      : item?.scoreAvailable ? "점수 확인" : "매칭 확인";
     return `
       <button class="contents-summary-card ${isActive ? "active" : ""}" data-content-summary="${escapeAttr(mode)}" type="button">
         <span>${contentModeEmoji(mode)} ${escapeHtml(contentModeLabel(mode))}</span>
         <strong>${count ? `${count}개 길드` : "데이터 없음"}</strong>
-        <small>${topGuild ? `${escapeHtml(topGuild.name)} · ${escapeHtml(availability)}` : "원본에서 확인 가능"}</small>
+        <small>${topGuild ? `${escapeHtml(topGuild.name)} · ${escapeHtml(availability)}` : "아직 기록 없음"}</small>
       </button>
     `;
   }).join("");
@@ -645,7 +689,7 @@ function renderGuildContentsGrid(modeData) {
     refs.contentsGrid.innerHTML = `
       <article class="contents-empty">
         <strong>표시할 매칭 데이터가 없습니다.</strong>
-        <p>브라우저에서 MGF 원본 페이지를 열거나, 로컬에서 <code>npm run collect:contents</code>를 실행해 최신 데이터를 갱신하세요.</p>
+        <p>다음 갱신 후 다시 확인해주세요.</p>
       </article>
     `;
     return;
@@ -668,7 +712,7 @@ function renderGuildContentsCard(guild, index, modeData) {
     ? ""
     : guild.scoreAvailable
       ? `<div class="contents-score available"><span>콘텐츠 점수</span><strong>${escapeHtml(guild.scoreText || formatKoreanPower(guild.scoreValue))}</strong><small>${escapeHtml(previousScore)}</small></div>`
-      : `<div class="contents-score unavailable"><span>콘텐츠 점수</span><strong>원본 점수 없음</strong><small>매칭 그룹만 자동 기록합니다.</small></div>`;
+      : `<div class="contents-score unavailable"><span>콘텐츠 점수</span><strong>점수 없음</strong><small>현재 매칭 길드만 표시됩니다.</small></div>`;
 
   return `
     <article class="contents-card ${isRequestedGuild ? "is-main" : ""}">
@@ -711,7 +755,7 @@ function getSelectedGuildContentBundle() {
 
 function normalizeGuildContents(value) {
   if (!value || !Array.isArray(value.guilds)) {
-    return { capturedAt: "", source: "원본", guilds: [] };
+    return { capturedAt: "", guilds: [] };
   }
   return value;
 }
@@ -720,13 +764,21 @@ function normalizeGuildWar(value) {
   if (!value || !Array.isArray(value.members)) {
     return {
       capturedAt: "",
-      sourceUrl: "https://www.msidle.gg/guilds/scania/%EC%B6%A9%EC%A3%BC%EC%8B%9C/guild-war",
-      sourceNotice: "아직 개인 대항전 수집 파일이 없습니다.",
       summary: { rosterCount: 0, currentKnownCount: 0, previousKnownCount: 0, comparedCount: 0, increasedCount: 0 },
       members: []
     };
   }
   return value;
+}
+
+function getEffectiveGuildWarData() {
+  const { currentWeekKey, previousWeekKey } = getGuildWarWeekKeys();
+  return mergeGuildWarManualData({
+    baseData: state.guildWar || normalizeGuildWar(null),
+    rosterMembers: state.data?.members || state.rawData?.members || [],
+    currentManual: state.guildWarManualCurrent || { date: currentWeekKey, items: [] },
+    previousManual: state.guildWarManualPrevious || { date: previousWeekKey, items: [] }
+  });
 }
 
 function renderGuildWarPanel() {
@@ -736,14 +788,12 @@ function renderGuildWarPanel() {
   if (refs.contentsMatchHeading) refs.contentsMatchHeading.hidden = !isLeague;
   if (!isLeague) return;
 
-  const data = state.guildWar || normalizeGuildWar(null);
+  const data = getEffectiveGuildWarData();
   const summary = data.summary || {};
   const members = Array.isArray(data.members) ? data.members : [];
-  if (refs.guildWarSourceLink) refs.guildWarSourceLink.href = data.sourceUrl || normalizeGuildWar(null).sourceUrl;
-
   refs.guildWarSummary.innerHTML = [
     [`이번 주 · ${data.currentWeekKey || "-"}`, `${Number(summary.currentKnownCount || 0)}/${Number(summary.rosterCount || 0)}명`, "current"],
-    [`공개 ${Number(summary.currentKnownCount || 0)}명 합계`, summary.currentKnownCount ? `${summary.currentTotalText || "0"}` : "미수집", "total"],
+    [`참여 ${Number(summary.currentKnownCount || 0)}명 합계`, summary.currentKnownCount ? `${summary.currentTotalText || "0"}` : "미집계", "total"],
     [`지난주 · ${data.previousWeekKey || "-"}`, `${Number(summary.previousKnownCount || 0)}명`, "previous"],
     ["주간 비교", `${Number(summary.comparedCount || 0)}명 · 상승 ${Number(summary.increasedCount || 0)}명`, "growth"]
   ].map(([label, value, tone]) => `
@@ -751,7 +801,7 @@ function renderGuildWarPanel() {
   `).join("");
 
   if (!members.length) {
-    refs.guildWarList.innerHTML = `<div class="guild-war-empty">개인 점수 데이터가 아직 없습니다. <code>npm run collect:guild-war</code>를 실행해주세요.</div>`;
+    refs.guildWarList.innerHTML = `<div class="guild-war-empty">개인 점수가 아직 없습니다. 다음 갱신 후 다시 확인해주세요.</div>`;
   } else {
     refs.guildWarList.innerHTML = `
       <div class="guild-war-list-head"><span>길드원</span><span>이번 주 개인점수</span><span>지난주</span><span>증감</span><span>상승률</span></div>
@@ -759,9 +809,9 @@ function renderGuildWarPanel() {
     `;
   }
 
-  const captured = data.capturedAt ? `${data.capturedAt} KST 수집` : "수집 전";
+  const captured = data.capturedAt ? `${data.capturedAt} 기준` : "갱신 대기 중";
   if (refs.guildWarNotice) {
-    refs.guildWarNotice.textContent = `${captured} · ${data.sourceNotice || "공개된 개인 점수만 기록하며 미수집은 0점이 아닙니다."}`;
+    refs.guildWarNotice.textContent = `${captured} · 점수가 없는 길드원은 미집계로 표시됩니다.`;
   }
 }
 
@@ -780,8 +830,8 @@ function renderGuildWarMember(member) {
   return `
     <article class="guild-war-member-row ${currentKnown ? "is-collected" : "is-missing"}">
       <div class="guild-war-member-name"><span>${escapeHtml(rank)}</span><strong>${escapeHtml(member.nickname || "-")}</strong></div>
-      <div class="guild-war-score current ${currentKnown ? "" : "missing"}"><strong>${escapeHtml(currentKnown ? member.currentScoreText || member.currentScoreRaw : "미수집")}</strong><small>${escapeHtml(currentKnown ? formatGuildWarTimestamp(member.currentUpdatedAt) : "제출 기록 없음")}</small></div>
-      <div class="guild-war-score previous ${previousKnown ? "" : "missing"}"><strong>${escapeHtml(previousKnown ? member.previousScoreText || member.previousScoreRaw : "미수집")}</strong><small>${member.previousRank == null ? "—" : `지난주 #${escapeHtml(member.previousRank)}`}</small></div>
+      <div class="guild-war-score current ${currentKnown ? "" : "missing"}"><strong>${escapeHtml(currentKnown ? member.currentScoreText || member.currentScoreRaw : "미집계")}</strong><small>${escapeHtml(currentKnown ? formatGuildWarTimestamp(member.currentUpdatedAt) : "참여 기록 없음")}</small></div>
+      <div class="guild-war-score previous ${previousKnown ? "" : "missing"}"><strong>${escapeHtml(previousKnown ? member.previousScoreText || member.previousScoreRaw : "미집계")}</strong><small>${member.previousRank == null ? "—" : `지난주 #${escapeHtml(member.previousRank)}`}</small></div>
       <strong class="guild-war-growth ${growthClass}">${escapeHtml(compared ? member.growthText || member.growthRaw : "비교 불가")}</strong>
       <strong class="guild-war-rate ${growthClass}">${escapeHtml(rate)}</strong>
     </article>
@@ -799,6 +849,209 @@ function formatGuildWarTimestamp(value) {
     minute: "2-digit",
     hour12: false
   }).format(date)} KST`;
+}
+
+function getGuildWarWeekKeys() {
+  const nowKst = new Date(Date.now() + (9 * 60 * 60 * 1000));
+  const day = nowKst.getUTCDay();
+  let daysSinceThursday = (day + 3) % 7;
+  if (day === 4 && nowKst.getUTCHours() < 12) daysSinceThursday = 7;
+  nowKst.setUTCDate(nowKst.getUTCDate() - daysSinceThursday);
+  const currentWeekKey = nowKst.toISOString().slice(0, 10);
+  const previousWeekKey = shiftDateString(currentWeekKey, -7);
+  return { currentWeekKey, previousWeekKey };
+}
+
+function initGuildWarManualClients() {
+  const { currentWeekKey, previousWeekKey } = getGuildWarWeekKeys();
+  state.guildWarManualCurrent = readLocalGuildWarManualWeek(currentWeekKey);
+  state.guildWarManualPrevious = readLocalGuildWarManualWeek(previousWeekKey);
+
+  const refreshGuildWarViews = () => {
+    if (state.page === "contents") renderGuildContentsPage();
+    if (refs.guildWarInputDialog?.open) renderGuildWarInputRows();
+  };
+
+  state.guildWarManualCurrentClient = createManualOverrideClient({
+    config: FIREBASE_CONFIG,
+    collectionName: FIREBASE_MANUAL_COLLECTION,
+    documentId: `guild-war-${currentWeekKey}`,
+    onManual: (manual) => {
+      state.guildWarManualCurrent = manual;
+      state.guildWarManualCurrentLoaded = true;
+      refreshGuildWarViews();
+      syncGuildWarInputReadyState();
+    },
+    onError: (error) => {
+      console.error(error);
+      state.guildWarManualStatus = "점수 저장 연결을 확인해주세요.";
+    },
+    onStatus: (status) => {
+      state.guildWarManualStatus = status === "online" ? "점수 저장 준비됨" : "점수 저장 연결 중";
+    }
+  });
+
+  state.guildWarManualPreviousClient = createManualOverrideClient({
+    config: FIREBASE_CONFIG,
+    collectionName: FIREBASE_MANUAL_COLLECTION,
+    documentId: `guild-war-${previousWeekKey}`,
+    onManual: (manual) => {
+      state.guildWarManualPrevious = manual;
+      state.guildWarManualPreviousLoaded = true;
+      refreshGuildWarViews();
+      syncGuildWarInputReadyState();
+    },
+    onError: (error) => {
+      console.error(error);
+      state.guildWarManualStatus = "점수 저장 연결을 확인해주세요.";
+    }
+  });
+
+  if (!state.guildWarManualCurrentClient.enabled) {
+    state.guildWarManualCurrentLoaded = true;
+    state.guildWarManualPreviousLoaded = true;
+    state.guildWarManualStatus = "이 브라우저에 점수를 저장합니다.";
+  }
+}
+
+function openGuildWarInput() {
+  if (!refs.guildWarInputDialog) return;
+  const ready = state.guildWarManualCurrentLoaded && state.guildWarManualPreviousLoaded;
+  refs.guildWarInputMessage.textContent = ready
+    ? state.guildWarManualStatus || "점수를 입력하고 저장해주세요."
+    : "저장된 점수를 불러오는 중입니다...";
+  if (refs.guildWarInputSearch) refs.guildWarInputSearch.value = "";
+  renderGuildWarInputRows();
+  syncGuildWarInputReadyState();
+  if (refs.guildWarInputDialog.showModal) refs.guildWarInputDialog.showModal();
+}
+
+function closeGuildWarInput() {
+  refs.guildWarInputDialog?.close();
+}
+
+function renderGuildWarInputRows() {
+  if (!refs.guildWarInputList) return;
+  const { currentWeekKey, previousWeekKey } = getGuildWarWeekKeys();
+  if (refs.guildWarInputCurrentWeek) refs.guildWarInputCurrentWeek.textContent = currentWeekKey;
+  if (refs.guildWarInputPreviousWeek) refs.guildWarInputPreviousWeek.textContent = previousWeekKey;
+
+  const effective = getEffectiveGuildWarData();
+  const memberMap = new Map(effective.members.map((member) => [member.nickname, member]));
+  const members = [...(state.data?.members || state.rawData?.members || [])]
+    .sort((a, b) => Number(a.rank || 9999) - Number(b.rank || 9999));
+
+  refs.guildWarInputList.innerHTML = members.map((member) => {
+    const score = memberMap.get(member.nickname) || {};
+    return `
+      <article class="guild-war-input-row" data-nickname="${escapeAttr(member.nickname || "")}">
+        <div class="guild-war-input-member">
+          <strong>${escapeHtml(member.nickname || "-")}</strong>
+          <small>${escapeHtml(member.job || "-")} · 길드순위 ${escapeHtml(member.rank || "-")}</small>
+        </div>
+        <label>
+          <span>이번 주</span>
+          <input data-guild-war-score="current" inputmode="numeric" autocomplete="off" value="${escapeAttr(formatGuildWarInputValue(score.currentScoreRaw))}" placeholder="점수 입력" />
+        </label>
+        <label>
+          <span>지난주</span>
+          <input data-guild-war-score="previous" inputmode="numeric" autocomplete="off" value="${escapeAttr(formatGuildWarInputValue(score.previousScoreRaw))}" placeholder="점수 입력" />
+        </label>
+      </article>
+    `;
+  }).join("");
+  filterGuildWarInputRows();
+}
+
+function filterGuildWarInputRows() {
+  const keyword = String(refs.guildWarInputSearch?.value || "").trim().toLowerCase();
+  refs.guildWarInputList?.querySelectorAll(".guild-war-input-row").forEach((row) => {
+    row.hidden = Boolean(keyword && !String(row.dataset.nickname || "").toLowerCase().includes(keyword));
+  });
+}
+
+async function saveGuildWarInput() {
+  if (!refs.guildWarInputList || !refs.saveGuildWarInput) return;
+  if (!state.guildWarManualCurrentLoaded || !state.guildWarManualPreviousLoaded) {
+    refs.guildWarInputMessage.textContent = "저장된 점수를 불러오는 중입니다. 잠시 후 다시 눌러주세요.";
+    return;
+  }
+  if (refs.guildWarInputPassword?.value !== EDIT_PASSWORD) {
+    refs.guildWarInputMessage.textContent = "저장 비밀번호가 맞지 않습니다.";
+    refs.guildWarInputPassword?.focus();
+    return;
+  }
+
+  const { currentWeekKey, previousWeekKey } = getGuildWarWeekKeys();
+  const now = new Date().toISOString();
+  const currentItems = [];
+  const previousItems = [];
+
+  try {
+    for (const row of refs.guildWarInputList.querySelectorAll(".guild-war-input-row")) {
+      const nickname = String(row.dataset.nickname || "");
+      const member = (state.data?.members || []).find((item) => item.nickname === nickname) || {};
+      const currentText = row.querySelector('[data-guild-war-score="current"]')?.value || "";
+      const previousText = row.querySelector('[data-guild-war-score="previous"]')?.value || "";
+      let currentRaw;
+      let previousRaw;
+      try {
+        currentRaw = normalizeGuildWarScoreInput(currentText);
+        previousRaw = normalizeGuildWarScoreInput(previousText);
+      } catch (error) {
+        throw new Error(`${nickname}: ${error.message}`);
+      }
+      const base = { guild: member.guild || "충주시", nickname, updatedAt: now };
+      if (currentRaw != null) currentItems.push({ ...base, scoreRaw: currentRaw });
+      if (previousRaw != null) previousItems.push({ ...base, scoreRaw: previousRaw });
+    }
+
+    const currentManual = { date: currentWeekKey, comparisonTargetDate: "", items: currentItems };
+    const previousManual = { date: previousWeekKey, comparisonTargetDate: "", items: previousItems };
+    refs.saveGuildWarInput.disabled = true;
+    refs.guildWarInputMessage.textContent = "점수를 저장하고 있습니다...";
+
+    if (state.guildWarManualCurrentClient?.enabled && state.guildWarManualPreviousClient?.enabled) {
+      await Promise.all([
+        state.guildWarManualCurrentClient.saveManual(currentManual),
+        state.guildWarManualPreviousClient.saveManual(previousManual)
+      ]);
+    } else {
+      writeLocalGuildWarManualWeeks(currentManual, previousManual);
+    }
+
+    state.guildWarManualCurrent = currentManual;
+    state.guildWarManualPrevious = previousManual;
+    refs.guildWarInputPassword.value = "";
+    refs.guildWarInputMessage.textContent = `저장 완료 · 이번 주 ${currentItems.length}명 · 지난주 ${previousItems.length}명`;
+    renderGuildWarPanel();
+    renderGuildContentsSummary(getSelectedGuildContentBundle(), getSelectedGuildContentBundle()?.modes?.[state.contentsMode] || null);
+  } catch (error) {
+    refs.guildWarInputMessage.textContent = `저장 실패: ${error.message}`;
+  } finally {
+    refs.saveGuildWarInput.disabled = false;
+  }
+}
+
+function syncGuildWarInputReadyState() {
+  if (!refs.saveGuildWarInput) return;
+  const ready = state.guildWarManualCurrentLoaded && state.guildWarManualPreviousLoaded;
+  refs.saveGuildWarInput.disabled = !ready;
+  if (refs.guildWarInputDialog?.open && ready && /불러오는 중|연결 중/.test(refs.guildWarInputMessage?.textContent || "")) {
+    refs.guildWarInputMessage.textContent = "점수를 입력하고 저장해주세요.";
+  }
+}
+
+function formatGuildWarInputValue(raw) {
+  if (raw == null || raw === "") return "";
+  return String(raw).replace(/\B(?=(\d{3})+(?!\d))/g, ",");
+}
+
+function shiftDateString(dateString, days) {
+  const date = new Date(`${dateString}T00:00:00Z`);
+  if (!Number.isFinite(date.getTime())) return "";
+  date.setUTCDate(date.getUTCDate() + Number(days || 0));
+  return date.toISOString().slice(0, 10);
 }
 
 function contentModeLabel(mode) {
@@ -819,10 +1072,121 @@ function renderLiveTobeolPage() {
 
   if (refs.liveTobeolGuild && !refs.liveTobeolGuild.value) refs.liveTobeolGuild.value = state.liveTobeolGuild || "충주시";
   if (refs.liveTobeolServer && !refs.liveTobeolServer.value) refs.liveTobeolServer.value = state.liveTobeolServer || "4";
-  updateLiveTobeolSourceLink();
   renderLiveTobeolResults();
 
   refs.footerText.textContent = "";
+}
+
+function renderEfficiencyPage() {
+  if (!refs.efficiencyGradeSummary || !refs.efficiencyList || !refs.efficiencyHighlights) return;
+  refs.title.textContent = "";
+  refs.subtitle.textContent = "";
+  if (refs.efficiencySort) refs.efficiencySort.value = state.efficiencySort;
+
+  const members = (state.data?.members || []).filter((member) => !state.guildFilter || state.guildFilter === "all" || member.guild === state.guildFilter);
+  const analysis = calculateRaidEfficiency(members);
+  const summary = analysis.summary;
+  const gradeCards = [
+    ["excellent", "매우 높음", "excellent"],
+    ["high", "높음", "high"],
+    ["normal", "적정", "normal"],
+    ["low", "낮음", "low"],
+    ["very-low", "매우 낮음", "very-low"]
+  ];
+
+  refs.efficiencyGradeSummary.innerHTML = gradeCards.map(([key, label, tone]) => `
+    <article class="efficiency-grade-card ${tone}">
+      <strong>${Number(summary.counts?.[key] || 0)}명</strong>
+      <span>${escapeHtml(label)}</span>
+    </article>
+  `).join("");
+
+  const best = summary.best;
+  const attention = summary.needsAttention;
+  refs.efficiencyHighlights.innerHTML = [
+    {
+      label: "최상위 효율",
+      value: best ? `${best.nickname} · ${best.efficiencyIndex}` : "집계 전",
+      detail: best ? `${best.job || "-"} · ${best.efficiencyGrade.label}` : "참여 점수가 필요합니다.",
+      tone: "best"
+    },
+    {
+      label: "우선 확인",
+      value: attention ? `${attention.nickname} · ${attention.efficiencyIndex}` : "집계 전",
+      detail: attention ? `${attention.job || "-"} · ${attention.efficiencyGrade.label}` : "참여 점수가 필요합니다.",
+      tone: "attention"
+    },
+    {
+      label: "분석 인원",
+      value: `${summary.participantCount}/${summary.rosterCount}명`,
+      detail: summary.participantCount === summary.rosterCount ? "전체 길드원 반영" : `미집계 ${summary.rosterCount - summary.participantCount}명`,
+      tone: "people"
+    }
+  ].map((item) => `
+    <article class="efficiency-highlight-card ${item.tone}">
+      <span>${escapeHtml(item.label)}</span>
+      <strong>${escapeHtml(item.value)}</strong>
+      <small>${escapeHtml(item.detail)}</small>
+    </article>
+  `).join("");
+
+  if (refs.efficiencyPeriod) {
+    const period = state.data?.raidPeriod || {};
+    refs.efficiencyPeriod.textContent = `${state.data?.sourceDataDate || state.data?.capturedDate || "-"} · ${period.metricLabel || "토벌 기록"}`;
+  }
+
+  const entries = sortEfficiencyEntries(analysis.entries, state.efficiencySort);
+  refs.efficiencyList.innerHTML = entries.length
+    ? entries.map(renderEfficiencyRow).join("")
+    : `<div class="efficiency-empty">표시할 토벌 데이터가 없습니다.</div>`;
+
+  if (refs.efficiencyJobGrid) {
+    refs.efficiencyJobGrid.innerHTML = analysis.jobs.length
+      ? analysis.jobs.map((job) => `
+          <article class="efficiency-job-card">
+            <div><strong>${escapeHtml(job.job)}</strong><span>${job.count}명</span></div>
+            <p>기준 멤버 <b>${escapeHtml(job.bestNickname)}</b></p>
+            <small>직업 내 최고 효율 ${escapeHtml(job.bestIndex ?? "-")}</small>
+          </article>
+        `).join("")
+      : `<div class="efficiency-empty">직업별로 비교할 데이터가 없습니다.</div>`;
+  }
+  refs.footerText.textContent = "";
+}
+
+function sortEfficiencyEntries(entries, mode) {
+  const list = [...(Array.isArray(entries) ? entries : [])];
+  const missingLast = (a, b, getter, direction = -1) => {
+    const left = getter(a);
+    const right = getter(b);
+    if (left == null && right == null) return String(a.nickname || "").localeCompare(String(b.nickname || ""), "ko");
+    if (left == null) return 1;
+    if (right == null) return -1;
+    return (Number(left) - Number(right)) * direction;
+  };
+  if (mode === "attention") return list.sort((a, b) => missingLast(a, b, (item) => item.efficiencyIndex, 1));
+  if (mode === "score") return list.sort((a, b) => missingLast(a, b, (item) => item.efficiencyRaid, -1));
+  if (mode === "power") return list.sort((a, b) => missingLast(a, b, (item) => item.efficiencyPower, -1));
+  return list.sort((a, b) => missingLast(a, b, (item) => item.efficiencyIndex, -1));
+}
+
+function renderEfficiencyRow(member) {
+  const grade = member.efficiencyGrade || { key: "unknown", label: "미집계" };
+  const hasEfficiency = member.efficiencyIndex != null;
+  return `
+    <article class="efficiency-row ${escapeAttr(grade.key)}">
+      <span class="efficiency-rank">${member.efficiencyRank == null ? "—" : member.efficiencyRank}</span>
+      <div class="efficiency-member">
+        <strong>${escapeHtml(member.nickname || "-")}</strong>
+        <small>${escapeHtml(member.job || "-")} · Lv.${escapeHtml(member.level || "-")}</small>
+      </div>
+      <div class="efficiency-metric power"><span>전투력</span><strong>${escapeHtml(compactPowerText(member.powerText, member.efficiencyPower))}</strong></div>
+      <div class="efficiency-metric actual"><span>실제점수</span><strong>${escapeHtml(member.efficiencyRaid > 0 ? formatKoreanPower(member.efficiencyRaid) : "미참여")}</strong></div>
+      <div class="efficiency-metric expected"><span>기대점수</span><strong>${escapeHtml(hasEfficiency ? formatKoreanPower(member.expectedTobeolValue) : "—")}</strong></div>
+      <strong class="efficiency-index">${escapeHtml(hasEfficiency ? member.efficiencyIndex.toFixed(1) : "—")}</strong>
+      <span class="efficiency-grade ${escapeAttr(grade.key)}">${escapeHtml(grade.label)}</span>
+    </article>
+  `;
 }
 
 async function searchLiveTobeol() {
@@ -838,16 +1202,13 @@ async function searchLiveTobeol() {
   state.liveTobeolServer = server;
   state.liveTobeolLoading = true;
   state.liveTobeolError = "";
-  updateLiveTobeolSourceLink();
   renderLiveTobeolResults();
 
   try {
     const url = makeLiveTobeolApiUrl(guild, server);
     const response = await fetch(url, { cache: "no-store" });
     const payload = await response.json().catch(() => null);
-    if (!response.ok || !payload?.ok) {
-      throw new Error(payload?.message || `실시간 조회 실패: ${response.status}`);
-    }
+    if (!response.ok || !payload?.ok) throw new Error("토벌전 정보를 확인하지 못했습니다.");
     state.liveTobeolData = payload;
   } catch (error) {
     state.liveTobeolData = null;
@@ -873,12 +1234,6 @@ function makeLiveTobeolApiUrl(guild, server) {
   return `${apiOrigin}/api/tobeol?${params.toString()}`;
 }
 
-function updateLiveTobeolSourceLink() {
-  if (!refs.liveTobeolSourceLink) return;
-  const guild = (refs.liveTobeolGuild?.value || state.liveTobeolGuild || "충주시").trim() || "충주시";
-  refs.liveTobeolSourceLink.href = `https://mgf.gg/contents/guild_info.php?g_name=${encodeURIComponent(guild)}`;
-}
-
 function renderLiveTobeolResults() {
   if (!refs.liveTobeolSummary || !refs.liveTobeolMissList || !refs.liveTobeolHitList) return;
 
@@ -887,9 +1242,9 @@ function renderLiveTobeolResults() {
   if (state.liveTobeolLoading) {
     refs.liveTobeolSummary.innerHTML = `
       <article class="live-summary-card loading">
-        <span>MGF 원본 조회 중</span>
+        <span>토벌전 확인 중</span>
         <strong>확인 중...</strong>
-        <small>길드원 행의 전투력·토벌 원본값을 가져오고 있습니다.</small>
+        <small>길드원의 참여와 점수를 확인하고 있습니다.</small>
       </article>
     `;
     refs.liveTobeolMissList.innerHTML = `<div class="live-empty">잠시만 기다려주세요.</div>`;
@@ -904,7 +1259,7 @@ function renderLiveTobeolResults() {
         <small>${escapeHtml(state.liveTobeolError)}</small>
       </article>
     `;
-    refs.liveTobeolMissList.innerHTML = `<div class="live-empty">Cloudflare Pages 배포 또는 npm run serve로 실행했는지 확인해주세요.</div>`;
+    refs.liveTobeolMissList.innerHTML = `<div class="live-empty">잠시 후 다시 조회해주세요.</div>`;
     return;
   }
 
@@ -968,7 +1323,7 @@ function renderLiveTobeolResults() {
     <article class="live-summary-card total">
       <span>${escapeHtml(period.metricLabel || "총 토벌전")}</span>
       <strong>${escapeHtml(summary.totalTobeolText || "0")}</strong>
-      <small>MGF ${escapeHtml(data.sourceDataDate || "-")} 기준 · ${escapeHtml(period.scoreWeekKey || "-")} 주차</small>
+      <small>${escapeHtml(data.sourceDataDate || "-")} 기준 · ${escapeHtml(period.scoreWeekKey || "-")} 주차</small>
     </article>
     <article class="live-summary-card compare">
       <span>서버 투력 대비 토벌 상승</span>
@@ -991,7 +1346,7 @@ function renderLiveTobeolMember(member, type) {
   const tobeolRank = member.tobeolRank ?? null;
   const scoreText = isHit ? (member.tobeolText || "0") : "—";
   const delta = rankDifferenceMeta(member);
-  const detailText = isHit ? `${statusText} · 서버 투력 ${powerRank ? `#${powerRank}` : "미수집"}` : "점수 없음";
+  const detailText = isHit ? `${statusText} · 서버 투력 ${powerRank ? `#${powerRank}` : "순위 없음"}` : "점수 없음";
 
   return `
     <article class="live-member-row ${isHit ? "is-hit" : "is-missed"}">
@@ -1006,7 +1361,7 @@ function renderLiveTobeolMember(member, type) {
       </div>
       <span class="featured-pill rank-delta ${delta.className}" title="${escapeAttr(delta.description)}">${escapeHtml(delta.shortLabel)}</span>
       <div class="featured-score-box tobeol-score">
-        <span>${tobeolRank == null ? "서버 토벌 미수집" : `서버 토벌 #${escapeHtml(tobeolRank)}`}</span>
+        <span>${tobeolRank == null ? "서버 토벌 순위 없음" : `서버 토벌 #${escapeHtml(tobeolRank)}`}</span>
         <strong>${escapeHtml(scoreText)}</strong>
         <small>${detailText}</small>
       </div>
@@ -1028,8 +1383,8 @@ function renderHotdealsPage() {
   const count = (bundle.items || []).length;
   const validCount = (bundle.items || []).filter((item) => item.status === "active").length;
   refs.footerText.textContent = count
-    ? `기프트카드 핫딜 ${count}개 표시 · 유효 가능 ${validCount}개 · ${bundle.capturedAt || "수집일 미상"}`
-    : "기프트카드 핫딜 데이터가 아직 없습니다. npm run collect:hotdeals 실행 후 다시 확인하세요.";
+    ? `기프트카드 핫딜 ${count}개 표시 · 유효 가능 ${validCount}개 · ${bundle.capturedAt || "업데이트 시각 미상"}`
+    : "기프트카드 할인 소식이 아직 없습니다.";
 }
 
 function renderHotdealSummary(bundle) {
@@ -1047,12 +1402,12 @@ function renderHotdealSummary(bundle) {
     <article class="hotdeal-summary-card">
       <span>최신 표시</span>
       <strong>${items.length}개</strong>
-      <small>${fallbackCount ? "유효 여부 불명 글 포함" : "수집된 후보 글"}</small>
+      <small>${fallbackCount ? "확인 필요 글 포함" : "할인 글 확인"}</small>
     </article>
     <article class="hotdeal-summary-card">
       <span>최근 글</span>
       <strong>${latest ? escapeHtml(latest.relativeTime || latest.dateText || "확인됨") : "없음"}</strong>
-      <small>${latest ? escapeHtml(latest.title || "-") : "수집 스크립트 실행 필요"}</small>
+      <small>${latest ? escapeHtml(latest.title || "-") : "새 소식 대기 중"}</small>
     </article>
   `;
 }
@@ -1064,7 +1419,7 @@ function renderHotdealGrid(bundle) {
     refs.hotdealGrid.innerHTML = `
       <article class="hotdeal-empty">
         <strong>표시할 기프트카드 핫딜이 아직 없습니다.</strong>
-        <p>로컬이나 GitHub Actions에서 <code>npm run collect:hotdeals</code>를 실행하면 최신 5개가 <code>data/hotdeals.json</code>에 저장됩니다.</p>
+        <p>새로운 할인 소식이 확인되면 여기에 표시됩니다.</p>
       </article>
     `;
     return;
@@ -1177,7 +1532,6 @@ function render() {
 
   renderBannerDate();
   renderSummary();
-  renderSourceHealth();
   renderFeaturedMembers();
   renderWeeklyRaidList();
   renderRankComparison();
@@ -1185,8 +1539,6 @@ function render() {
 
   if (state.page !== "dashboard") return;
 
-  const editText = data.manualAppliedCount > 0 ? ` · 수정 ${data.manualAppliedCount}건 반영` : "";
-  const sourceText = data.dataSource === "MGF guild_info" ? "" : "";
   refs.footerText.textContent = "";
 }
 
@@ -1250,34 +1602,7 @@ function renderSummary() {
 function renderBannerDate() {
   if (!refs.bannerSourceDate) return;
   const sourceDate = state.data?.sourceDataDate || state.data?.capturedDate || "-";
-  refs.bannerSourceDate.textContent = `${sourceDate} MGF 기준`;
-}
-
-function renderSourceHealth() {
-  if (!refs.sourceHealth) return;
-  const data = state.data || {};
-  const period = data.raidPeriod || {};
-  const raidHistory = data.raidHistoryByGuild?.[state.guildFilter === "all" ? (data.guilds?.[0] || "충주시") : state.guildFilter] || {};
-  const lastWeekText = raidHistory.status === "final"
-    ? `${raidHistory.snapshotDate} 확정본 연결`
-    : raidHistory.status === "latest_capture"
-      ? `${raidHistory.snapshotDate} 마지막 수집본`
-      : "첫 월요일 수집 후 표시";
-  const warSummary = state.guildWar?.summary || {};
-  const warCoverage = `${Number(warSummary.currentKnownCount || 0)}/${Number(warSummary.rosterCount || 0)}명 공개`;
-  const items = [
-    { icon: "✓", tone: "ok", label: "전투력", value: "원본 정수 직접 수집", detail: "data-bp · 길드 합계 검증" },
-    { icon: "✓", tone: "ok", label: "토벌전", value: period.metricLabel || "주차 판별", detail: `${period.scoreWeekKey || "-"} 주차 · data-gb` },
-    { icon: "↺", tone: raidHistory.status === "not_collected" ? "wait" : "ok", label: "지난주 토벌", value: lastWeekText, detail: "월요일 확정본 우선" },
-    { icon: "↺", tone: warSummary.currentKnownCount ? "ok" : "wait", label: "개인 대항전", value: warCoverage, detail: "주차별 저장 · 미수집은 null" },
-    { icon: "—", tone: "limited", label: "일일 길드 업그레이드", value: "공개 원본 미제공", detail: "자동 완료 여부 판정 불가" }
-  ];
-  refs.sourceHealth.innerHTML = items.map((item) => `
-    <article class="source-health-card ${item.tone}">
-      <span class="source-health-icon">${item.icon}</span>
-      <div><small>${escapeHtml(item.label)}</small><strong>${escapeHtml(item.value)}</strong><p>${escapeHtml(item.detail)}</p></div>
-    </article>
-  `).join("");
+  refs.bannerSourceDate.textContent = `${sourceDate} 기준`;
 }
 
 function renderWeeklyRaidList() {
@@ -1302,8 +1627,8 @@ function renderWeeklyRaidList() {
       const lastWeekLabel = isPreviousWeekFinal && lastWeek != null
         ? "이 주차 확정본으로 저장됨"
         : lastWeek == null
-        ? "수집 이력 없음"
-        : `${formatKoreanPower(lastWeek)}${member.lastWeekTobeolIsFinal ? " · 확정" : " · 마지막 수집"}`;
+        ? "지난주 기록 없음"
+        : `${formatKoreanPower(lastWeek)}${member.lastWeekTobeolIsFinal ? " · 확정" : " · 최근 기록"}`;
       return `
         <article class="weekly-raid-row">
           <span class="weekly-rank">${index + 1}</span>
@@ -1357,7 +1682,7 @@ function renderRankComparisonRow(member) {
         <small>${escapeHtml(member.job || "-")} · Lv.${escapeHtml(member.level || "-")}</small>
       </div>
       <div class="rank-metric power"><span>${escapeHtml(powerRank)}</span><small>${escapeHtml(compactPowerText(member.powerText, member.powerValue))}</small></div>
-      <div class="rank-metric raid"><span>${escapeHtml(tobeolRank)}</span><small>${escapeHtml(member.tobeolRank == null ? "0점 또는 순위 미수집" : compactPowerText(member.tobeolText, tobeolValue))}</small></div>
+      <div class="rank-metric raid"><span>${escapeHtml(tobeolRank)}</span><small>${escapeHtml(member.tobeolRank == null ? "점수 또는 순위 없음" : compactPowerText(member.tobeolText, tobeolValue))}</small></div>
       <span class="rank-delta ${delta.className}" title="${escapeAttr(delta.description)}">${escapeHtml(delta.label)}</span>
     </article>
   `;
@@ -1383,7 +1708,7 @@ function sortRankComparisonMembers(members, mode = "tobeol") {
 
 function rankDifferenceMeta(member) {
   if (member?.tobeolRank == null || member?.raidRankAdvantage == null) {
-    return { label: "비교 불가", shortLabel: "미수집", className: "unranked", description: "서버 투력 또는 서버 토벌 순위가 없어 비교에서 제외" };
+    return { label: "비교 불가", shortLabel: "순위 없음", className: "unranked", description: "서버 투력 또는 서버 토벌 순위가 없어 비교에서 제외" };
   }
   const delta = Number(member.raidRankAdvantage || 0);
   if (delta > 0) return { label: `토벌 +${delta} ↑`, shortLabel: `+${delta} ↑`, className: "ahead", description: `Scania 4 토벌 순위가 서버 투력 순위보다 ${delta}칸 높음` };
@@ -1405,7 +1730,6 @@ function renderCharactersPage() {
   renderVisualOverview();
   renderCharacterGrid(members);
 
-  const editText = data.manualAppliedCount > 0 ? ` · 수정 ${data.manualAppliedCount}건 반영` : "";
   refs.footerText.textContent = "";
 }
 
@@ -1519,7 +1843,7 @@ function renderCharacterCard(member, index, max) {
         ${renderCharacterBar("전투력", member.powerText || formatKoreanPower(member.powerValue), percentOf(member.powerValue, max.power), "") }
         ${renderCharacterBar("전투력 변화", powerGrowth == null ? "비교 없음" : formatSignedKoreanPower(powerGrowth), percentOf(Math.abs(powerGrowth || 0), max.powerGrowth), growthClass(powerGrowth))}
         ${renderCharacterBar("토벌전", formatKoreanPower(member.tobeolValue), percentOf(member.tobeolValue, max.tobeol), "") }
-        ${renderCharacterBar("지난주 토벌", lastWeekTobeol == null ? "수집 이력 없음" : formatKoreanPower(lastWeekTobeol), percentOf(lastWeekTobeol || 0, max.lastWeekTobeol), "")}
+        ${renderCharacterBar("지난주 토벌", lastWeekTobeol == null ? "기록 없음" : formatKoreanPower(lastWeekTobeol), percentOf(lastWeekTobeol || 0, max.lastWeekTobeol), "")}
       </div>
     </article>
   `;
@@ -1626,7 +1950,7 @@ function renderVirtualPage() {
   const count = getVirtualParticipantsForRender().filter((item) => !item.isGhost).length;
   refs.footerText.textContent = state.virtualClient?.enabled
     ? `실시간 광장 연결 · 현재 ${count}명 표시 중`
-    : "데모 모드 · Firebase 규칙을 배포하면 다른 사람과 실시간으로 만날 수 있습니다.";
+    : "현재 기기에서만 이용할 수 있습니다.";
 }
 
 function renderVirtualStatus() {
@@ -2431,7 +2755,7 @@ function renderGamePage() {
   const playerCount = getGamePlayersForRender().filter((item) => !item.isBot).length;
   refs.footerText.textContent = state.gameClient?.enabled
     ? `실시간 젤리난투 연결 · 현재 ${playerCount}명 참여 중 · 같은 팀은 흡수 불가`
-    : "데모 모드 · Firebase 규칙을 배포하면 길드원끼리 실시간 난투가 가능합니다.";
+    : "현재 기기에서만 이용할 수 있습니다.";
 }
 
 function renderGameStatus() {
@@ -3055,22 +3379,22 @@ function getTableSpec(tab) {
   if (tab === "tobeol") {
     return {
       title: "토벌전 주차별 기록",
-      desc: "길드 상세 data-gb 원본과 월요일 확정 이력을 분리한 점수입니다.",
+      desc: "이번 주와 지난주 토벌 점수를 비교합니다.",
       columns: [
         col("#", (_, index) => `<span class="badge">${index + 1}</span>`),
         col("길드", renderGuild),
         col("닉네임", renderName),
         col("레벨", (member) => `Lv.${member.level}`),
-        col("MGF 원본 점수", (member) => formatKoreanPower(member.sourceTobeolValue ?? member.tobeolValue)),
+        col("이번 주 점수", (member) => formatKoreanPower(member.sourceTobeolValue ?? member.tobeolValue)),
         col("지난주 기록", (member) => member.lastWeekTobeolText || "-"),
-        col("상태", (member) => member.lastWeekTobeolValue == null ? `<span class="muted">이력 없음</span>` : `<span class="good">${member.lastWeekTobeolIsFinal ? "확정" : "마지막 수집"}</span>`)
+        col("상태", (member) => member.lastWeekTobeolValue == null ? `<span class="muted">기록 없음</span>` : `<span class="good">${member.lastWeekTobeolIsFinal ? "확정" : "최근 기록"}</span>`)
       ]
     };
   }
 
   return {
     title: "전투력 성장",
-    desc: "길드원 전투력 수집 데이터 기준입니다.",
+    desc: "길드원의 현재 전투력과 최근 변화를 비교합니다.",
     columns: [
       col("#", (_, index) => `<span class="badge">${index + 1}</span>`),
       col("길드", renderGuild),
@@ -3298,6 +3622,7 @@ async function applyManualFromEditor() {
     if (state.page === "characters") renderCharactersPage();
     if (state.page === "virtual") renderVirtualPage();
     if (state.page === "game") renderGamePage();
+    if (state.page === "efficiency") renderEfficiencyPage();
   } catch (error) {
     refs.editorMessage.textContent = `저장 실패: ${error.message}`;
   } finally {
@@ -3331,6 +3656,7 @@ async function clearLocalManual() {
     if (state.page === "characters") renderCharactersPage();
     if (state.page === "virtual") renderVirtualPage();
     if (state.page === "game") renderGamePage();
+    if (state.page === "efficiency") renderEfficiencyPage();
     renderEditorRows();
   } catch (error) {
     refs.editorMessage.textContent = `초기화 실패: ${error.message}`;
@@ -3387,6 +3713,9 @@ function initManualClient() {
       }
       if (state.page === "virtual") {
         renderVirtualPage();
+      }
+      if (state.page === "efficiency") {
+        renderEfficiencyPage();
       }
     },
     onError: (error) => {
@@ -3644,6 +3973,34 @@ function readLocalManual() {
   } catch {
     return null;
   }
+}
+
+function readLocalGuildWarManualStore() {
+  try {
+    const raw = localStorage.getItem(LOCAL_GUILD_WAR_MANUAL_KEY);
+    const parsed = raw ? JSON.parse(raw) : null;
+    return parsed && typeof parsed === "object" ? parsed : { weeks: {} };
+  } catch {
+    return { weeks: {} };
+  }
+}
+
+function readLocalGuildWarManualWeek(weekKey) {
+  const store = state.guildWarManualStore || readLocalGuildWarManualStore();
+  return store?.weeks?.[weekKey] || null;
+}
+
+function writeLocalGuildWarManualWeeks(...manualWeeks) {
+  const store = state.guildWarManualStore && typeof state.guildWarManualStore === "object"
+    ? state.guildWarManualStore
+    : { weeks: {} };
+  if (!store.weeks || typeof store.weeks !== "object") store.weeks = {};
+  for (const manual of manualWeeks) {
+    if (!manual?.date) continue;
+    store.weeks[manual.date] = manual;
+  }
+  state.guildWarManualStore = store;
+  localStorage.setItem(LOCAL_GUILD_WAR_MANUAL_KEY, JSON.stringify(store));
 }
 
 function mergeManualObjects(manualObjects, capturedDate) {

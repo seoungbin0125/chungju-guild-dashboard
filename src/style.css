@@ -9383,3 +9383,272 @@ footer.hidden-footer { display: none !important; }
   .guild-war-rate { grid-area: rate; justify-self: end; }
   .contents-section-title { align-items: flex-start; }
 }
+
+/* v2.4.0 raid efficiency */
+.efficiency-hero,
+.efficiency-panel,
+.efficiency-job-panel {
+  border: 1px solid var(--line);
+  color: var(--text);
+  background: rgba(255, 255, 255, .94);
+  box-shadow: var(--shadow-sm);
+}
+
+.efficiency-hero {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 18px;
+  margin-bottom: 12px;
+  padding: 18px;
+  border-radius: 26px;
+  background:
+    radial-gradient(circle at 93% 8%, rgba(21,151,134,.15), transparent 16rem),
+    rgba(255,255,255,.95);
+}
+
+.efficiency-hero h2,
+.efficiency-panel-header h2 { margin: 0; }
+.efficiency-hero p:not(.eyebrow),
+.efficiency-panel-header p { margin: 4px 0 0; color: var(--muted); font-size: .76rem; }
+
+.efficiency-sort-control {
+  display: grid;
+  flex: 0 0 180px;
+  gap: 4px;
+  color: var(--muted);
+  font-size: .64rem;
+  font-weight: 900;
+}
+
+.efficiency-sort-control select {
+  min-height: 40px;
+  padding: 0 34px 0 11px;
+  border: 1px solid #c9dedb;
+  border-radius: 12px;
+  color: var(--primary-dark);
+  background: #f4faf9;
+  font-weight: 850;
+}
+
+.efficiency-grade-summary {
+  display: grid;
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+  gap: 8px;
+  margin-bottom: 10px;
+}
+
+.efficiency-grade-card {
+  display: grid;
+  gap: 2px;
+  padding: 13px 14px;
+  border: 1px solid var(--line);
+  border-radius: 16px;
+  text-align: center;
+  background: rgba(255,255,255,.92);
+}
+.efficiency-grade-card strong { color: var(--text); font-size: 1.15rem; }
+.efficiency-grade-card span { color: var(--muted); font-size: .67rem; font-weight: 900; }
+.efficiency-grade-card.excellent { border-top: 4px solid #087565; background: #effaf6; }
+.efficiency-grade-card.high { border-top: 4px solid #2c7994; background: #f0f8fb; }
+.efficiency-grade-card.normal { border-top: 4px solid #66877f; }
+.efficiency-grade-card.low { border-top: 4px solid #d69042; background: #fff9ef; }
+.efficiency-grade-card.very-low { border-top: 4px solid #c85d55; background: #fff5f4; }
+
+.efficiency-highlights {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 8px;
+  margin-bottom: 12px;
+}
+
+.efficiency-highlight-card {
+  display: grid;
+  gap: 3px;
+  padding: 13px 15px;
+  border: 1px solid #dceae8;
+  border-radius: 17px;
+  background: #fbfefd;
+}
+.efficiency-highlight-card span { color: var(--muted); font-size: .64rem; font-weight: 900; }
+.efficiency-highlight-card strong { overflow: hidden; color: var(--text); font-size: .94rem; text-overflow: ellipsis; white-space: nowrap; }
+.efficiency-highlight-card small { color: var(--muted); font-size: .62rem; }
+.efficiency-highlight-card.best { border-color: #addacf; background: #eaf8f3; }
+.efficiency-highlight-card.attention { border-color: #efd1c2; background: #fff5ef; }
+.efficiency-highlight-card.people { border-color: #cbdce8; background: #f4f9fc; }
+
+.efficiency-panel,
+.efficiency-job-panel {
+  margin-bottom: 12px;
+  padding: 16px;
+  border-radius: 24px;
+}
+
+.efficiency-panel-header {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 14px;
+  margin-bottom: 12px;
+}
+
+.efficiency-table-wrap {
+  overflow-x: auto;
+  scrollbar-width: thin;
+}
+
+.efficiency-table-head,
+.efficiency-row {
+  display: grid;
+  grid-template-columns: 50px minmax(150px, 1.2fr) minmax(115px, .8fr) minmax(125px, .9fr) minmax(125px, .9fr) 82px 92px;
+  align-items: center;
+  gap: 10px;
+  min-width: 850px;
+}
+
+.efficiency-table-head {
+  padding: 0 12px 6px;
+  color: var(--muted);
+  font-size: .61rem;
+  font-weight: 900;
+}
+
+.efficiency-list { display: grid; gap: 6px; max-height: 780px; overflow-y: auto; padding-right: 2px; }
+.efficiency-row { padding: 10px 12px; border: 1px solid #dceae8; border-radius: 14px; background: #fff; }
+.efficiency-row.excellent { border-color: #b6ded5; background: #f1faf7; }
+.efficiency-row.very-low { border-color: #f0cfca; background: #fff6f5; }
+.efficiency-row.unknown { opacity: .72; }
+
+.efficiency-rank {
+  display: grid;
+  width: 30px;
+  height: 28px;
+  place-items: center;
+  border-radius: 9px;
+  color: #fff;
+  background: #456d74;
+  font-size: .66rem;
+  font-weight: 950;
+}
+.efficiency-row.excellent .efficiency-rank { background: #087565; }
+.efficiency-row.very-low .efficiency-rank { background: #b85d56; }
+
+.efficiency-member,
+.efficiency-metric { min-width: 0; }
+.efficiency-member strong,
+.efficiency-metric strong { display: block; overflow: hidden; color: var(--text); font-size: .76rem; text-overflow: ellipsis; white-space: nowrap; }
+.efficiency-member small,
+.efficiency-metric span { display: block; margin-top: 2px; color: var(--muted); font-size: .57rem; }
+.efficiency-metric.actual strong { color: #087565; }
+.efficiency-metric.expected strong { color: #55747a; }
+.efficiency-index { color: #08788a; font-size: .78rem; }
+
+.efficiency-grade {
+  display: inline-flex;
+  justify-content: center;
+  padding: 6px 9px;
+  border-radius: 999px;
+  font-size: .61rem;
+  font-weight: 950;
+  white-space: nowrap;
+}
+.efficiency-grade.excellent { color: #087565; background: #def3eb; }
+.efficiency-grade.high { color: #226985; background: #e5f3f8; }
+.efficiency-grade.normal { color: #526f74; background: #e9f1f0; }
+.efficiency-grade.low { color: #a66b1d; background: #fff1d8; }
+.efficiency-grade.very-low { color: #b64d45; background: #ffe7e4; }
+.efficiency-grade.unknown { color: #7a8b8e; background: #edf2f2; }
+.efficiency-notice { margin: 10px 2px 0; color: var(--muted); font-size: .62rem; }
+.efficiency-empty { padding: 20px; color: var(--muted); text-align: center; }
+
+.efficiency-job-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(190px, 1fr)); gap: 8px; }
+.efficiency-job-card { padding: 13px; border: 1px solid #dceae8; border-radius: 15px; background: #fbfefd; }
+.efficiency-job-card div { display: flex; align-items: center; justify-content: space-between; gap: 8px; }
+.efficiency-job-card div strong { color: var(--text); font-size: .82rem; }
+.efficiency-job-card div span { padding: 3px 7px; border-radius: 999px; color: #087565; background: #e1f4ee; font-size: .58rem; font-weight: 900; }
+.efficiency-job-card p { margin: 8px 0 2px; color: var(--muted); font-size: .66rem; }
+.efficiency-job-card p b { color: var(--text); }
+.efficiency-job-card small { color: #55747a; font-size: .6rem; }
+
+/* v2.4.0 web score entry */
+.guild-war-input-open { flex: 0 0 auto; min-height: 38px; }
+.guild-war-input-dialog { width: min(980px, calc(100% - 24px)); max-width: none; padding: 0; border: 0; background: transparent; }
+.guild-war-input-dialog::backdrop { background: rgba(4, 30, 38, .55); backdrop-filter: blur(4px); }
+.guild-war-input-card { width: 100%; max-width: none !important; max-height: min(88vh, 900px); overflow: auto; padding: 18px !important; }
+.guild-war-input-weeks { display: flex; flex-wrap: wrap; gap: 8px; margin: 0 0 11px; }
+.guild-war-input-weeks span { padding: 7px 10px; border: 1px solid #c9dedb; border-radius: 999px; color: var(--muted); background: #f4faf9; font-size: .64rem; font-weight: 800; }
+.guild-war-input-weeks strong { color: #087565; }
+.guild-war-input-toolbar { display: grid; grid-template-columns: minmax(160px, 1fr) minmax(160px, 1fr) auto; align-items: end; gap: 9px; }
+.guild-war-input-toolbar label { display: grid; gap: 4px; color: var(--muted); font-size: .62rem; font-weight: 900; }
+.guild-war-input-toolbar input,
+.guild-war-input-row input { width: 100%; min-height: 40px; padding: 0 11px; border: 1px solid #c9dedb; border-radius: 11px; color: var(--text); background: #fff; outline: none; }
+.guild-war-input-toolbar input:focus,
+.guild-war-input-row input:focus { border-color: #159786; box-shadow: 0 0 0 3px rgba(21,151,134,.12); }
+.guild-war-input-help { margin: 10px 0 4px; color: var(--muted); font-size: .62rem; }
+.guild-war-input-table-wrap { margin-top: 8px; overflow: hidden; border: 1px solid #dceae8; border-radius: 16px; background: #f8fcfb; }
+.guild-war-input-head,
+.guild-war-input-row { display: grid; grid-template-columns: minmax(170px, .9fr) minmax(190px, 1fr) minmax(190px, 1fr); align-items: center; gap: 10px; }
+.guild-war-input-head { padding: 9px 12px; color: #486a70; background: #e9f4f2; font-size: .62rem; font-weight: 900; }
+.guild-war-input-list { display: grid; gap: 6px; max-height: 54vh; overflow-y: auto; padding: 7px; }
+.guild-war-input-row { padding: 9px 10px; border: 1px solid #dceae8; border-radius: 12px; background: #fff; }
+.guild-war-input-member strong { display: block; overflow: hidden; color: var(--text); font-size: .76rem; text-overflow: ellipsis; white-space: nowrap; }
+.guild-war-input-member small { display: block; margin-top: 2px; color: var(--muted); font-size: .57rem; }
+.guild-war-input-row label > span { display: none; }
+
+@media (max-width: 900px) {
+  .bottom-mobile-nav { grid-template-columns: repeat(5, minmax(0, 1fr)) !important; }
+  .bottom-tab { min-width: 0 !important; padding: 0 4px !important; }
+  .efficiency-table-head,
+  .efficiency-row { min-width: 790px; }
+}
+
+@media (max-width: 700px) {
+  .efficiency-hero { display: grid; padding: 14px; border-radius: 22px; }
+  .efficiency-sort-control { width: 100%; min-width: 0; }
+  .efficiency-grade-summary { grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 5px; }
+  .efficiency-grade-card { padding: 9px 3px; border-radius: 12px; }
+  .efficiency-grade-card strong { font-size: .9rem; }
+  .efficiency-grade-card span { font-size: .52rem; }
+  .efficiency-highlights { grid-template-columns: 1fr; gap: 6px; }
+  .efficiency-panel,
+  .efficiency-job-panel { padding: 11px; border-radius: 20px; }
+  .efficiency-panel-header { display: grid; gap: 8px; }
+  .efficiency-table-head { display: none; }
+  .efficiency-table-wrap { overflow: visible; }
+  .efficiency-list { max-height: none; overflow: visible; }
+  .efficiency-row {
+    grid-template-columns: 30px minmax(0, 1fr) minmax(0, .85fr) auto;
+    grid-template-areas:
+      "rank member member grade"
+      ". power actual index"
+      ". expected expected index";
+    gap: 7px;
+    min-width: 0;
+    padding: 9px;
+  }
+  .efficiency-rank { grid-area: rank; }
+  .efficiency-member { grid-area: member; }
+  .efficiency-metric.power { grid-area: power; }
+  .efficiency-metric.actual { grid-area: actual; }
+  .efficiency-metric.expected { grid-area: expected; }
+  .efficiency-index { grid-area: index; align-self: center; }
+  .efficiency-grade { grid-area: grade; }
+  .efficiency-job-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+
+  .guild-war-input-card { max-height: 92vh; padding: 13px !important; }
+  .guild-war-input-toolbar { grid-template-columns: 1fr 1fr; }
+  .guild-war-input-toolbar .primary-btn { grid-column: 1 / -1; }
+  .guild-war-input-head { display: none; }
+  .guild-war-input-list { max-height: 58vh; padding: 6px; }
+  .guild-war-input-row { grid-template-columns: 1fr 1fr; gap: 7px; }
+  .guild-war-input-member { grid-column: 1 / -1; }
+  .guild-war-input-row label > span { display: block; margin-bottom: 3px; color: var(--muted); font-size: .56rem; font-weight: 850; }
+}
+
+@media (max-width: 390px) {
+  .bottom-tab b { font-size: .58rem !important; }
+  .bottom-tab span { font-size: 1rem !important; }
+  .efficiency-job-grid { grid-template-columns: 1fr; }
+  .guild-war-input-toolbar { grid-template-columns: 1fr; }
+  .guild-war-input-toolbar .primary-btn { grid-column: auto; }
+}

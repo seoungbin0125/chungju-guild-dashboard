@@ -209,7 +209,7 @@ async function run() {
   const latest = {
     ok: true,
     version: 8,
-    appVersion: "v2.2.0",
+    appVersion: "v2.4.0",
     guilds: guildNames,
     guild: guildNames.join(" · "),
     capturedDate,
