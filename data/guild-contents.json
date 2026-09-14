@@ -1,7 +1,7 @@
 {
   "version": 2,
-  "capturedAt": "2026-09-14 04:27:55",
-  "capturedDate": "2026-09-14",
+  "capturedAt": "2026-09-15 05:57:28",
+  "capturedDate": "2026-09-15",
   "source": "MGF.GG guild content cards",
   "sourceCapabilities": {
     "matchGroup": {
@@ -24,7 +24,7 @@
           "scoreStatus": "source_not_provided",
           "currentGuildScoreText": null,
           "currentGuildScoreValue": null,
-          "previousCaptureDate": "2026-09-13",
+          "previousCaptureDate": "2026-09-14",
           "previousGuildScoreText": null,
           "previousGuildScoreValue": null,
           "guilds": [
@@ -60,7 +60,7 @@
                 {
                   "rank": 5,
                   "nickname": "덤덤이",
-                  "powerText": "1,641조 1,863억 2,086만"
+                  "powerText": "1,674조 4,513억 3,640만"
                 }
               ]
             },
@@ -76,7 +76,7 @@
                 {
                   "rank": 1,
                   "nickname": "야가다소장",
-                  "powerText": "1경 398조 6,941억"
+                  "powerText": "1경 404조 6,852억"
                 },
                 {
                   "rank": 2,
@@ -86,7 +86,7 @@
                 {
                   "rank": 3,
                   "nickname": "해방불독",
-                  "powerText": "3,462조 865억 8,222만"
+                  "powerText": "3,468조 6,151억 3,138만"
                 },
                 {
                   "rank": 4,
@@ -121,18 +121,18 @@
                 },
                 {
                   "rank": 3,
+                  "nickname": "빛의띠",
+                  "powerText": "2,658조 8,020억 7,166만"
+                },
+                {
+                  "rank": 4,
                   "nickname": "식코",
                   "powerText": "2,543조 6,833억 6,766만"
                 },
                 {
-                  "rank": 4,
+                  "rank": 5,
                   "nickname": "KR#AAMC4LNAGU",
                   "powerText": "2,455조 7,496억 1,326만"
-                },
-                {
-                  "rank": 5,
-                  "nickname": "초록색연필",
-                  "powerText": "2,263조 6,088억 7,917만"
                 }
               ]
             },
@@ -163,7 +163,7 @@
                 {
                   "rank": 4,
                   "nickname": "이녀닝",
-                  "powerText": "2,425조 5,745억 1,426만"
+                  "powerText": "2,497조 8,029억 2,332만"
                 },
                 {
                   "rank": 5,
@@ -184,22 +184,22 @@
                 {
                   "rank": 1,
                   "nickname": "종리추추추",
-                  "powerText": "3경 4,223조 8,539억"
+                  "powerText": "3경 6,179조 6,850억"
                 },
                 {
                   "rank": 2,
                   "nickname": "소라차니",
-                  "powerText": "6,300조 5,546억 2,572만"
+                  "powerText": "7,291조 9,227억 4,525만"
                 },
                 {
                   "rank": 3,
                   "nickname": "아윤이파파",
-                  "powerText": "522조 278억 5,631만"
+                  "powerText": "580조 3,123억 8,780만"
                 },
                 {
                   "rank": 4,
                   "nickname": "원피스내꼬",
-                  "powerText": "354조 3,621억 827만"
+                  "powerText": "477조 8,526억 3,276만"
                 },
                 {
                   "rank": 5,
@@ -218,7 +218,7 @@
           "scoreStatus": "source_not_provided",
           "currentGuildScoreText": null,
           "currentGuildScoreValue": null,
-          "previousCaptureDate": "2026-09-13",
+          "previousCaptureDate": "2026-09-14",
           "previousGuildScoreText": null,
           "previousGuildScoreValue": null,
           "guilds": [
@@ -254,7 +254,7 @@
                 {
                   "rank": 5,
                   "nickname": "덤덤이",
-                  "powerText": "1,641조 1,863억 2,086만"
+                  "powerText": "1,674조 4,513억 3,640만"
                 }
               ]
             },
@@ -270,7 +270,7 @@
                 {
                   "rank": 1,
                   "nickname": "쭈라빠빠",
-                  "powerText": "1경 699조 1,309억"
+                  "powerText": "1경 1,359조 2,447억"
                 },
                 {
                   "rank": 2,
@@ -280,7 +280,7 @@
                 {
                   "rank": 3,
                   "nickname": "KlKl",
-                  "powerText": "2,684조 4,619억 9,163만"
+                  "powerText": "2,693조 4,838억 7,078만"
                 },
                 {
                   "rank": 4,
@@ -290,7 +290,7 @@
                 {
                   "rank": 5,
                   "nickname": "힐쌈",
-                  "powerText": "2,203조 502억 5,854만"
+                  "powerText": "2,208조 222억 9,550만"
                 }
               ]
             },
@@ -315,18 +315,18 @@
                 },
                 {
                   "rank": 3,
+                  "nickname": "빛의띠",
+                  "powerText": "2,658조 8,020억 7,166만"
+                },
+                {
+                  "rank": 4,
                   "nickname": "식코",
                   "powerText": "2,543조 6,833억 6,766만"
                 },
                 {
-                  "rank": 4,
+                  "rank": 5,
                   "nickname": "KR#AAMC4LNAGU",
                   "powerText": "2,455조 7,496억 1,326만"
-                },
-                {
-                  "rank": 5,
-                  "nickname": "초록색연필",
-                  "powerText": "2,263조 6,088억 7,917만"
                 }
               ]
             },
@@ -351,18 +351,18 @@
                 },
                 {
                   "rank": 3,
+                  "nickname": "튼튼쪼꼬",
+                  "powerText": "2,442조 578억 7,740만"
+                },
+                {
+                  "rank": 4,
                   "nickname": "돌복파파",
                   "powerText": "2,102조 4,878억 1,081만"
                 },
                 {
-                  "rank": 4,
-                  "nickname": "튼튼쪼꼬",
-                  "powerText": "1,892조 3,396억 2,905만"
-                },
-                {
                   "rank": 5,
                   "nickname": "PainfulLife",
-                  "powerText": "1,479조 6,842억 9,973만"
+                  "powerText": "1,687조 2,004억 5,693만"
                 }
               ]
             },
@@ -393,7 +393,7 @@
                 {
                   "rank": 4,
                   "nickname": "이녀닝",
-                  "powerText": "2,425조 5,745억 1,426만"
+                  "powerText": "2,497조 8,029억 2,332만"
                 },
                 {
                   "rank": 5,
@@ -419,12 +419,12 @@
                 {
                   "rank": 2,
                   "nickname": "맹루미",
-                  "powerText": "3,872조 8,582억 5,694만"
+                  "powerText": "3,973조 4,936억 9,383만"
                 },
                 {
                   "rank": 3,
                   "nickname": "나부1",
-                  "powerText": "2,946조 4,649억 2,201만"
+                  "powerText": "2,980조 6,033억 2,717만"
                 },
                 {
                   "rank": 4,
@@ -434,7 +434,7 @@
                 {
                   "rank": 5,
                   "nickname": "상도동꿀펀치",
-                  "powerText": "2,474조 4,034억 1,497만"
+                  "powerText": "2,590조 8,492억 9,943만"
                 }
               ]
             },
@@ -484,7 +484,7 @@
           "scoreStatus": "source_not_provided",
           "currentGuildScoreText": null,
           "currentGuildScoreValue": null,
-          "previousCaptureDate": "2026-09-13",
+          "previousCaptureDate": "2026-09-14",
           "previousGuildScoreText": null,
           "previousGuildScoreValue": null,
           "guilds": [
@@ -520,7 +520,7 @@
                 {
                   "rank": 5,
                   "nickname": "덤덤이",
-                  "powerText": "1,641조 1,863억 2,086만"
+                  "powerText": "1,674조 4,513억 3,640만"
                 }
               ]
             },
@@ -541,7 +541,7 @@
                 {
                   "rank": 2,
                   "nickname": "Vzl존신궁V",
-                  "powerText": "3,361조 7,623억 5,447만"
+                  "powerText": "3,594조 6,847억 6,645만"
                 },
                 {
                   "rank": 3,
