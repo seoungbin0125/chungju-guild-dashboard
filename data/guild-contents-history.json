@@ -3318,7 +3318,7 @@
     }
   },
   {
-    "capturedAt": "2026-09-16 05:14:00",
+    "capturedAt": "2026-09-16 20:24:42",
     "capturedDate": "2026-09-16",
     "keyword": "충주시",
     "modes": {
@@ -3338,7 +3338,7 @@
             "name": "충주시",
             "master": "꿀꿀왕자",
             "server": "Scania 4",
-            "powerText": "3경 2,771조 426억",
+            "powerText": "3경 7,464조 3,794억",
             "scoreText": null,
             "scoreValue": null,
             "scoreAvailable": false,
@@ -3346,12 +3346,12 @@
               {
                 "rank": 1,
                 "nickname": "그만해주세요",
-                "powerText": "9,101조 3,547억 9,405만"
+                "powerText": "9,106조 4,521억 6,615만"
               },
               {
                 "rank": 2,
                 "nickname": "하닉대떡락",
-                "powerText": "4,383조 268억 7,773만"
+                "powerText": "4,459조 9,822억 65만"
               },
               {
                 "rank": 3,
@@ -3361,12 +3361,12 @@
               {
                 "rank": 4,
                 "nickname": "아크메이지불",
-                "powerText": "1,823조 3,559억 811만"
+                "powerText": "1,843조 1,620억 1,622만"
               },
               {
                 "rank": 5,
                 "nickname": "덤덤이",
-                "powerText": "1,703조 2,870억 9,644만"
+                "powerText": "1,706조 1,338억 4,810만"
               }
             ]
           },
@@ -3482,7 +3482,7 @@
             "name": "Tudor",
             "master": "튜더지",
             "server": "Scania 75",
-            "powerText": "4경 25조 1,500억",
+            "powerText": "4경 9,152조 9,497억",
             "scoreText": null,
             "scoreValue": null,
             "scoreAvailable": false,
@@ -3490,12 +3490,12 @@
               {
                 "rank": 1,
                 "nickname": "종리추추추",
-                "powerText": "3경 8,776조 6,733억"
+                "powerText": "3경 8,784조 9,030억"
               },
               {
                 "rank": 2,
                 "nickname": "소라차니",
-                "powerText": "8,112조 6,660억 1,953만"
+                "powerText": "8,133조 8,239억 9,302만"
               },
               {
                 "rank": 3,
@@ -3505,12 +3505,12 @@
               {
                 "rank": 4,
                 "nickname": "원피스내꼬",
-                "powerText": "540조 727억 8,718만"
+                "powerText": "587조 7,954억 6,139만"
               },
               {
                 "rank": 5,
                 "nickname": "켄드뤽",
-                "powerText": "171조 7,788억 3,999만"
+                "powerText": "173조 1,922억 8,385만"
               }
             ]
           }
@@ -3532,7 +3532,7 @@
             "name": "충주시",
             "master": "꿀꿀왕자",
             "server": "Scania 4",
-            "powerText": "3경 2,771조 426억",
+            "powerText": "3경 7,464조 3,794억",
             "scoreText": null,
             "scoreValue": null,
             "scoreAvailable": false,
@@ -3540,12 +3540,12 @@
               {
                 "rank": 1,
                 "nickname": "그만해주세요",
-                "powerText": "9,101조 3,547억 9,405만"
+                "powerText": "9,106조 4,521억 6,615만"
               },
               {
                 "rank": 2,
                 "nickname": "하닉대떡락",
-                "powerText": "4,383조 268억 7,773만"
+                "powerText": "4,459조 9,822억 65만"
               },
               {
                 "rank": 3,
@@ -3555,12 +3555,12 @@
               {
                 "rank": 4,
                 "nickname": "아크메이지불",
-                "powerText": "1,823조 3,559억 811만"
+                "powerText": "1,843조 1,620억 1,622만"
               },
               {
                 "rank": 5,
                 "nickname": "덤덤이",
-                "powerText": "1,703조 2,870억 9,644만"
+                "powerText": "1,706조 1,338억 4,810만"
               }
             ]
           },
@@ -3637,42 +3637,6 @@
             ]
           },
           {
-            "name": "스웨디시",
-            "master": "보댐",
-            "server": "Scania 2",
-            "powerText": "3경 3,860조 1,489억",
-            "scoreText": null,
-            "scoreValue": null,
-            "scoreAvailable": false,
-            "members": [
-              {
-                "rank": 1,
-                "nickname": "잡기술",
-                "powerText": "1경 2,713조 6,843억"
-              },
-              {
-                "rank": 2,
-                "nickname": "보댐",
-                "powerText": "4,959조 3,049억 692만"
-              },
-              {
-                "rank": 3,
-                "nickname": "튼튼쪼꼬",
-                "powerText": "2,452조 6,374억 2,994만"
-              },
-              {
-                "rank": 4,
-                "nickname": "돌복파파",
-                "powerText": "2,102조 4,878억 1,081만"
-              },
-              {
-                "rank": 5,
-                "nickname": "PainfulLife",
-                "powerText": "1,709조 5,479억 5,540만"
-              }
-            ]
-          },
-          {
             "name": "넘버투",
             "master": "나부1",
             "server": "Scania 31",
@@ -3745,10 +3709,46 @@
             ]
           },
           {
+            "name": "스웨디시",
+            "master": "보댐",
+            "server": "Scania 2",
+            "powerText": "3경 6,618조 577억",
+            "scoreText": null,
+            "scoreValue": null,
+            "scoreAvailable": false,
+            "members": [
+              {
+                "rank": 1,
+                "nickname": "잡기술",
+                "powerText": "1경 2,713조 6,843억"
+              },
+              {
+                "rank": 2,
+                "nickname": "보댐",
+                "powerText": "4,959조 3,049억 692만"
+              },
+              {
+                "rank": 3,
+                "nickname": "튼튼쪼꼬",
+                "powerText": "2,554조 6,158억 5,140만"
+              },
+              {
+                "rank": 4,
+                "nickname": "돌복파파",
+                "powerText": "2,133조 2,500억 8,679만"
+              },
+              {
+                "rank": 5,
+                "nickname": "PainfulLife",
+                "powerText": "1,709조 5,479억 5,540만"
+              }
+            ]
+          },
+          {
             "name": "VAMOS",
             "master": "타락파시안느",
             "server": "Scania 26",
-            "powerText": "3경 1,695조 6,915억",
+            "powerText": "3경 4,565조 7,245억",
             "scoreText": null,
             "scoreValue": null,
             "scoreAvailable": false,
@@ -3766,17 +3766,17 @@
               {
                 "rank": 3,
                 "nickname": "자이그",
-                "powerText": "3,583조 3,081억 4,019만"
+                "powerText": "3,748조 2,929억 6,344만"
               },
               {
                 "rank": 4,
                 "nickname": "히쪼",
-                "powerText": "2,661조 5,670억 5,839만"
+                "powerText": "2,682조 9,425억 1,697만"
               },
               {
                 "rank": 5,
                 "nickname": "촙챱",
-                "powerText": "2,276조 8,738억 9,201만"
+                "powerText": "2,283조 3,700억 6,872만"
               }
             ]
           }
@@ -3798,7 +3798,7 @@
             "name": "충주시",
             "master": "꿀꿀왕자",
             "server": "Scania 4",
-            "powerText": "3경 2,771조 426억",
+            "powerText": "3경 7,464조 3,794억",
             "scoreText": null,
             "scoreValue": null,
             "scoreAvailable": false,
@@ -3806,12 +3806,12 @@
               {
                 "rank": 1,
                 "nickname": "그만해주세요",
-                "powerText": "9,101조 3,547억 9,405만"
+                "powerText": "9,106조 4,521억 6,615만"
               },
               {
                 "rank": 2,
                 "nickname": "하닉대떡락",
-                "powerText": "4,383조 268억 7,773만"
+                "powerText": "4,459조 9,822억 65만"
               },
               {
                 "rank": 3,
@@ -3821,12 +3821,12 @@
               {
                 "rank": 4,
                 "nickname": "아크메이지불",
-                "powerText": "1,823조 3,559억 811만"
+                "powerText": "1,843조 1,620억 1,622만"
               },
               {
                 "rank": 5,
                 "nickname": "덤덤이",
-                "powerText": "1,703조 2,870억 9,644만"
+                "powerText": "1,706조 1,338억 4,810만"
               }
             ]
           },
