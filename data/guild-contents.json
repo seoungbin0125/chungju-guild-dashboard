@@ -1,6 +1,6 @@
 {
   "version": 2,
-  "capturedAt": "2026-09-17 01:01:52",
+  "capturedAt": "2026-09-17 05:05:47",
   "capturedDate": "2026-09-17",
   "source": "MGF.GG guild content cards",
   "sourceCapabilities": {
@@ -68,7 +68,7 @@
               "name": "노가다협회",
               "master": "야가다소장",
               "server": "Scania 24",
-              "powerText": "3경 7,888조 4,587억",
+              "powerText": "4경 3,680조 7,455억",
               "scoreText": null,
               "scoreValue": null,
               "scoreAvailable": false,
@@ -76,7 +76,7 @@
                 {
                   "rank": 1,
                   "nickname": "야가다소장",
-                  "powerText": "1경 2,207조 5,807억"
+                  "powerText": "1경 2,429조 5,885억"
                 },
                 {
                   "rank": 2,
@@ -86,7 +86,7 @@
                 {
                   "rank": 3,
                   "nickname": "해방불독",
-                  "powerText": "3,588조 9,465억 8,431만"
+                  "powerText": "3,591조 5,281억 9,149만"
                 },
                 {
                   "rank": 4,
@@ -96,7 +96,7 @@
                 {
                   "rank": 5,
                   "nickname": "민선씨",
-                  "powerText": "2,862조 5,468억 3,251만"
+                  "powerText": "3,079조 6,035억 1,125만"
                 }
               ]
             },
@@ -104,7 +104,7 @@
               "name": "단풍마을",
               "master": "무니핑",
               "server": "Scania 18",
-              "powerText": "3경 6,173조 8,575억",
+              "powerText": "4경 1,688조 3,746억",
               "scoreText": null,
               "scoreValue": null,
               "scoreAvailable": false,
@@ -112,12 +112,12 @@
                 {
                   "rank": 1,
                   "nickname": "무니핑",
-                  "powerText": "1경 1,753조 5,927억"
+                  "powerText": "1경 1,797조 8,904억"
                 },
                 {
                   "rank": 2,
                   "nickname": "초록색연필",
-                  "powerText": "2,985조 1,991억 9,086만"
+                  "powerText": "3,020조 4,134억 6,999만"
                 },
                 {
                   "rank": 3,
@@ -126,13 +126,13 @@
                 },
                 {
                   "rank": 4,
-                  "nickname": "빛의띠",
-                  "powerText": "2,658조 8,020억 7,166만"
+                  "nickname": "식코",
+                  "powerText": "2,693조 6,196억 9,761만"
                 },
                 {
                   "rank": 5,
-                  "nickname": "KR#AAMC4LNAGU",
-                  "powerText": "2,617조 7,113억 6,100만"
+                  "nickname": "빛의띠",
+                  "powerText": "2,658조 8,020억 7,166만"
                 }
               ]
             },
@@ -262,7 +262,7 @@
               "name": "젤리밥",
               "master": "현뽀얌",
               "server": "Scania 25",
-              "powerText": "3경 7,052조 7,483억",
+              "powerText": "4경 1,786조 9,336억",
               "scoreText": null,
               "scoreValue": null,
               "scoreAvailable": false,
@@ -279,18 +279,18 @@
                 },
                 {
                   "rank": 3,
-                  "nickname": "KlKl",
-                  "powerText": "2,700조 5,918억 6,792만"
+                  "nickname": "아루한",
+                  "powerText": "2,859조 3,227억 5,483만"
                 },
                 {
                   "rank": 4,
-                  "nickname": "아루한",
-                  "powerText": "2,586조 1,113억 4,322만"
+                  "nickname": "KlKl",
+                  "powerText": "2,736조 4,947억 8,246만"
                 },
                 {
                   "rank": 5,
                   "nickname": "힐쌈",
-                  "powerText": "2,412조 7,026억 3,965만"
+                  "powerText": "2,548조 7,166억 6,672만"
                 }
               ]
             },
@@ -298,7 +298,7 @@
               "name": "단풍마을",
               "master": "무니핑",
               "server": "Scania 18",
-              "powerText": "3경 6,173조 8,575억",
+              "powerText": "4경 1,688조 3,746억",
               "scoreText": null,
               "scoreValue": null,
               "scoreAvailable": false,
@@ -306,12 +306,12 @@
                 {
                   "rank": 1,
                   "nickname": "무니핑",
-                  "powerText": "1경 1,753조 5,927억"
+                  "powerText": "1경 1,797조 8,904억"
                 },
                 {
                   "rank": 2,
                   "nickname": "초록색연필",
-                  "powerText": "2,985조 1,991억 9,086만"
+                  "powerText": "3,020조 4,134억 6,999만"
                 },
                 {
                   "rank": 3,
@@ -320,13 +320,13 @@
                 },
                 {
                   "rank": 4,
-                  "nickname": "빛의띠",
-                  "powerText": "2,658조 8,020억 7,166만"
+                  "nickname": "식코",
+                  "powerText": "2,693조 6,196억 9,761만"
                 },
                 {
                   "rank": 5,
-                  "nickname": "KR#AAMC4LNAGU",
-                  "powerText": "2,617조 7,113억 6,100만"
+                  "nickname": "빛의띠",
+                  "powerText": "2,658조 8,020억 7,166만"
                 }
               ]
             },
