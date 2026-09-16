@@ -2390,9 +2390,9 @@
     ]
   },
   {
-    "date": "2026-09-16",
+    "date": "2026-09-17",
     "sourceDataDate": "2026-09-16",
-    "capturedAt": "2026-09-16 20:24:42",
+    "capturedAt": "2026-09-17 01:01:52",
     "guild": "충주시",
     "sourceUrl": "https://mgf.gg/contents/guild_info.php?g_name=%EC%B6%A9%EC%A3%BC%EC%8B%9C",
     "raidPeriod": {
@@ -2429,11 +2429,13 @@
         "powerRank": 70,
         "sourceTobeolValue": 611159151131,
         "sourceTobeolRaw": "611159151131",
-        "serverTobeolRank": 62,
-        "tobeolRank": 62,
-        "serverRaidRankAdvantage": 8,
-        "raidRankAdvantage": 8,
-        "tobeolValue": 611159151131
+        "currentWeekTobeolValue": 0,
+        "tobeolCarryoverDetected": true,
+        "serverTobeolRank": null,
+        "tobeolRank": null,
+        "serverRaidRankAdvantage": null,
+        "raidRankAdvantage": null,
+        "tobeolValue": 0
       },
       {
         "nickname": "하닉대떡락",
@@ -2448,11 +2450,13 @@
         "powerRank": 115,
         "sourceTobeolValue": 303818077195,
         "sourceTobeolRaw": "303818077195",
-        "serverTobeolRank": 126,
-        "tobeolRank": 126,
-        "serverRaidRankAdvantage": -11,
-        "raidRankAdvantage": -11,
-        "tobeolValue": 303818077195
+        "currentWeekTobeolValue": 0,
+        "tobeolCarryoverDetected": true,
+        "serverTobeolRank": null,
+        "tobeolRank": null,
+        "serverRaidRankAdvantage": null,
+        "raidRankAdvantage": null,
+        "tobeolValue": 0
       },
       {
         "nickname": "로라상",
@@ -2467,11 +2471,13 @@
         "powerRank": 193,
         "sourceTobeolValue": 261623111802,
         "sourceTobeolRaw": "261623111802",
-        "serverTobeolRank": 143,
-        "tobeolRank": 143,
-        "serverRaidRankAdvantage": 50,
-        "raidRankAdvantage": 50,
-        "tobeolValue": 261623111802
+        "currentWeekTobeolValue": 0,
+        "tobeolCarryoverDetected": true,
+        "serverTobeolRank": null,
+        "tobeolRank": null,
+        "serverRaidRankAdvantage": null,
+        "raidRankAdvantage": null,
+        "tobeolValue": 0
       },
       {
         "nickname": "아크메이지불",
@@ -2486,11 +2492,13 @@
         "powerRank": 202,
         "sourceTobeolValue": 368376413658,
         "sourceTobeolRaw": "368376413658",
-        "serverTobeolRank": 105,
-        "tobeolRank": 105,
-        "serverRaidRankAdvantage": 97,
-        "raidRankAdvantage": 97,
-        "tobeolValue": 368376413658
+        "currentWeekTobeolValue": 0,
+        "tobeolCarryoverDetected": true,
+        "serverTobeolRank": null,
+        "tobeolRank": null,
+        "serverRaidRankAdvantage": null,
+        "raidRankAdvantage": null,
+        "tobeolValue": 0
       },
       {
         "nickname": "덤덤이",
@@ -2505,11 +2513,13 @@
         "powerRank": 215,
         "sourceTobeolValue": 270709069733,
         "sourceTobeolRaw": "270709069733",
-        "serverTobeolRank": 140,
-        "tobeolRank": 140,
-        "serverRaidRankAdvantage": 75,
-        "raidRankAdvantage": 75,
-        "tobeolValue": 270709069733
+        "currentWeekTobeolValue": 0,
+        "tobeolCarryoverDetected": true,
+        "serverTobeolRank": null,
+        "tobeolRank": null,
+        "serverRaidRankAdvantage": null,
+        "raidRankAdvantage": null,
+        "tobeolValue": 0
       },
       {
         "nickname": "밤밈",
@@ -2524,11 +2534,13 @@
         "powerRank": 227,
         "sourceTobeolValue": 189626480571,
         "sourceTobeolRaw": "189626480571",
-        "serverTobeolRank": 204,
-        "tobeolRank": 204,
-        "serverRaidRankAdvantage": 23,
-        "raidRankAdvantage": 23,
-        "tobeolValue": 189626480571
+        "currentWeekTobeolValue": 0,
+        "tobeolCarryoverDetected": true,
+        "serverTobeolRank": null,
+        "tobeolRank": null,
+        "serverRaidRankAdvantage": null,
+        "raidRankAdvantage": null,
+        "tobeolValue": 0
       },
       {
         "nickname": "다누비",
@@ -2543,11 +2555,13 @@
         "powerRank": 229,
         "sourceTobeolValue": 138198296732,
         "sourceTobeolRaw": "138198296732",
-        "serverTobeolRank": 296,
-        "tobeolRank": 296,
-        "serverRaidRankAdvantage": -67,
-        "raidRankAdvantage": -67,
-        "tobeolValue": 138198296732
+        "currentWeekTobeolValue": 0,
+        "tobeolCarryoverDetected": true,
+        "serverTobeolRank": null,
+        "tobeolRank": null,
+        "serverRaidRankAdvantage": null,
+        "raidRankAdvantage": null,
+        "tobeolValue": 0
       },
       {
         "nickname": "월다미",
@@ -2562,11 +2576,13 @@
         "powerRank": 252,
         "sourceTobeolValue": 151133695438,
         "sourceTobeolRaw": "151133695438",
-        "serverTobeolRank": 265,
-        "tobeolRank": 265,
-        "serverRaidRankAdvantage": -13,
-        "raidRankAdvantage": -13,
-        "tobeolValue": 151133695438
+        "currentWeekTobeolValue": 0,
+        "tobeolCarryoverDetected": true,
+        "serverTobeolRank": null,
+        "tobeolRank": null,
+        "serverRaidRankAdvantage": null,
+        "raidRankAdvantage": null,
+        "tobeolValue": 0
       },
       {
         "nickname": "꿀꿀왕자",
@@ -2581,11 +2597,13 @@
         "powerRank": 259,
         "sourceTobeolValue": 216299766699,
         "sourceTobeolRaw": "216299766699",
-        "serverTobeolRank": 176,
-        "tobeolRank": 176,
-        "serverRaidRankAdvantage": 83,
-        "raidRankAdvantage": 83,
-        "tobeolValue": 216299766699
+        "currentWeekTobeolValue": 0,
+        "tobeolCarryoverDetected": true,
+        "serverTobeolRank": null,
+        "tobeolRank": null,
+        "serverRaidRankAdvantage": null,
+        "raidRankAdvantage": null,
+        "tobeolValue": 0
       },
       {
         "nickname": "에릭페디",
@@ -2600,11 +2618,13 @@
         "powerRank": 277,
         "sourceTobeolValue": 147366544358,
         "sourceTobeolRaw": "147366544358",
-        "serverTobeolRank": 271,
-        "tobeolRank": 271,
-        "serverRaidRankAdvantage": 6,
-        "raidRankAdvantage": 6,
-        "tobeolValue": 147366544358
+        "currentWeekTobeolValue": 0,
+        "tobeolCarryoverDetected": true,
+        "serverTobeolRank": null,
+        "tobeolRank": null,
+        "serverRaidRankAdvantage": null,
+        "raidRankAdvantage": null,
+        "tobeolValue": 0
       },
       {
         "nickname": "찐라에몽",
@@ -2619,11 +2639,13 @@
         "powerRank": 300,
         "sourceTobeolValue": 129166936260,
         "sourceTobeolRaw": "129166936260",
-        "serverTobeolRank": 325,
-        "tobeolRank": 325,
-        "serverRaidRankAdvantage": -25,
-        "raidRankAdvantage": -25,
-        "tobeolValue": 129166936260
+        "currentWeekTobeolValue": 0,
+        "tobeolCarryoverDetected": true,
+        "serverTobeolRank": null,
+        "tobeolRank": null,
+        "serverRaidRankAdvantage": null,
+        "raidRankAdvantage": null,
+        "tobeolValue": 0
       },
       {
         "nickname": "구조기술사",
@@ -2638,11 +2660,13 @@
         "powerRank": 310,
         "sourceTobeolValue": 192627181428,
         "sourceTobeolRaw": "192627181428",
-        "serverTobeolRank": 199,
-        "tobeolRank": 199,
-        "serverRaidRankAdvantage": 111,
-        "raidRankAdvantage": 111,
-        "tobeolValue": 192627181428
+        "currentWeekTobeolValue": 0,
+        "tobeolCarryoverDetected": true,
+        "serverTobeolRank": null,
+        "tobeolRank": null,
+        "serverRaidRankAdvantage": null,
+        "raidRankAdvantage": null,
+        "tobeolValue": 0
       },
       {
         "nickname": "인천꿀망치",
@@ -2657,11 +2681,13 @@
         "powerRank": 314,
         "sourceTobeolValue": 208143727254,
         "sourceTobeolRaw": "208143727254",
-        "serverTobeolRank": 184,
-        "tobeolRank": 184,
-        "serverRaidRankAdvantage": 130,
-        "raidRankAdvantage": 130,
-        "tobeolValue": 208143727254
+        "currentWeekTobeolValue": 0,
+        "tobeolCarryoverDetected": true,
+        "serverTobeolRank": null,
+        "tobeolRank": null,
+        "serverRaidRankAdvantage": null,
+        "raidRankAdvantage": null,
+        "tobeolValue": 0
       },
       {
         "nickname": "설와",
@@ -2676,11 +2702,13 @@
         "powerRank": 336,
         "sourceTobeolValue": 106517095600,
         "sourceTobeolRaw": "106517095600",
-        "serverTobeolRank": 424,
-        "tobeolRank": 424,
-        "serverRaidRankAdvantage": -88,
-        "raidRankAdvantage": -88,
-        "tobeolValue": 106517095600
+        "currentWeekTobeolValue": 0,
+        "tobeolCarryoverDetected": true,
+        "serverTobeolRank": null,
+        "tobeolRank": null,
+        "serverRaidRankAdvantage": null,
+        "raidRankAdvantage": null,
+        "tobeolValue": 0
       },
       {
         "nickname": "꼬딱지",
@@ -2695,11 +2723,13 @@
         "powerRank": 383,
         "sourceTobeolValue": 177667154304,
         "sourceTobeolRaw": "177667154304",
-        "serverTobeolRank": 215,
-        "tobeolRank": 215,
-        "serverRaidRankAdvantage": 168,
-        "raidRankAdvantage": 168,
-        "tobeolValue": 177667154304
+        "currentWeekTobeolValue": 0,
+        "tobeolCarryoverDetected": true,
+        "serverTobeolRank": null,
+        "tobeolRank": null,
+        "serverRaidRankAdvantage": null,
+        "raidRankAdvantage": null,
+        "tobeolValue": 0
       },
       {
         "nickname": "배수장",
@@ -2714,11 +2744,13 @@
         "powerRank": 424,
         "sourceTobeolValue": 129235318170,
         "sourceTobeolRaw": "129235318170",
-        "serverTobeolRank": 324,
-        "tobeolRank": 324,
-        "serverRaidRankAdvantage": 100,
-        "raidRankAdvantage": 100,
-        "tobeolValue": 129235318170
+        "currentWeekTobeolValue": 0,
+        "tobeolCarryoverDetected": true,
+        "serverTobeolRank": null,
+        "tobeolRank": null,
+        "serverRaidRankAdvantage": null,
+        "raidRankAdvantage": null,
+        "tobeolValue": 0
       },
       {
         "nickname": "짭라에몽",
@@ -2733,11 +2765,13 @@
         "powerRank": 440,
         "sourceTobeolValue": 114138845385,
         "sourceTobeolRaw": "114138845385",
-        "serverTobeolRank": 386,
-        "tobeolRank": 386,
-        "serverRaidRankAdvantage": 54,
-        "raidRankAdvantage": 54,
-        "tobeolValue": 114138845385
+        "currentWeekTobeolValue": 0,
+        "tobeolCarryoverDetected": true,
+        "serverTobeolRank": null,
+        "tobeolRank": null,
+        "serverRaidRankAdvantage": null,
+        "raidRankAdvantage": null,
+        "tobeolValue": 0
       },
       {
         "nickname": "메빙",
@@ -2752,11 +2786,13 @@
         "powerRank": 443,
         "sourceTobeolValue": 126345033136,
         "sourceTobeolRaw": "126345033136",
-        "serverTobeolRank": 333,
-        "tobeolRank": 333,
-        "serverRaidRankAdvantage": 110,
-        "raidRankAdvantage": 110,
-        "tobeolValue": 126345033136
+        "currentWeekTobeolValue": 0,
+        "tobeolCarryoverDetected": true,
+        "serverTobeolRank": null,
+        "tobeolRank": null,
+        "serverRaidRankAdvantage": null,
+        "raidRankAdvantage": null,
+        "tobeolValue": 0
       },
       {
         "nickname": "폭싹",
@@ -2771,11 +2807,13 @@
         "powerRank": 456,
         "sourceTobeolValue": 115306796772,
         "sourceTobeolRaw": "115306796772",
-        "serverTobeolRank": 382,
-        "tobeolRank": 382,
-        "serverRaidRankAdvantage": 74,
-        "raidRankAdvantage": 74,
-        "tobeolValue": 115306796772
+        "currentWeekTobeolValue": 0,
+        "tobeolCarryoverDetected": true,
+        "serverTobeolRank": null,
+        "tobeolRank": null,
+        "serverRaidRankAdvantage": null,
+        "raidRankAdvantage": null,
+        "tobeolValue": 0
       },
       {
         "nickname": "비숌숌",
@@ -2790,11 +2828,13 @@
         "powerRank": 476,
         "sourceTobeolValue": 73139886612,
         "sourceTobeolRaw": "73139886612",
-        "serverTobeolRank": 575,
-        "tobeolRank": 575,
-        "serverRaidRankAdvantage": -99,
-        "raidRankAdvantage": -99,
-        "tobeolValue": 73139886612
+        "currentWeekTobeolValue": 0,
+        "tobeolCarryoverDetected": true,
+        "serverTobeolRank": null,
+        "tobeolRank": null,
+        "serverRaidRankAdvantage": null,
+        "raidRankAdvantage": null,
+        "tobeolValue": 0
       },
       {
         "nickname": "동네힘센사람",
@@ -2809,11 +2849,13 @@
         "powerRank": 504,
         "sourceTobeolValue": 132303887753,
         "sourceTobeolRaw": "132303887753",
-        "serverTobeolRank": 316,
-        "tobeolRank": 316,
-        "serverRaidRankAdvantage": 188,
-        "raidRankAdvantage": 188,
-        "tobeolValue": 132303887753
+        "currentWeekTobeolValue": 0,
+        "tobeolCarryoverDetected": true,
+        "serverTobeolRank": null,
+        "tobeolRank": null,
+        "serverRaidRankAdvantage": null,
+        "raidRankAdvantage": null,
+        "tobeolValue": 0
       },
       {
         "nickname": "고시생",
@@ -2828,11 +2870,13 @@
         "powerRank": 534,
         "sourceTobeolValue": 141328951693,
         "sourceTobeolRaw": "141328951693",
-        "serverTobeolRank": 285,
-        "tobeolRank": 285,
-        "serverRaidRankAdvantage": 249,
-        "raidRankAdvantage": 249,
-        "tobeolValue": 141328951693
+        "currentWeekTobeolValue": 0,
+        "tobeolCarryoverDetected": true,
+        "serverTobeolRank": null,
+        "tobeolRank": null,
+        "serverRaidRankAdvantage": null,
+        "raidRankAdvantage": null,
+        "tobeolValue": 0
       },
       {
         "nickname": "짱진호",
@@ -2847,11 +2891,13 @@
         "powerRank": 540,
         "sourceTobeolValue": 88870874518,
         "sourceTobeolRaw": "88870874518",
-        "serverTobeolRank": 508,
-        "tobeolRank": 508,
-        "serverRaidRankAdvantage": 32,
-        "raidRankAdvantage": 32,
-        "tobeolValue": 88870874518
+        "currentWeekTobeolValue": 0,
+        "tobeolCarryoverDetected": true,
+        "serverTobeolRank": null,
+        "tobeolRank": null,
+        "serverRaidRankAdvantage": null,
+        "raidRankAdvantage": null,
+        "tobeolValue": 0
       },
       {
         "nickname": "오군오군",
@@ -2866,11 +2912,13 @@
         "powerRank": 587,
         "sourceTobeolValue": 143015298977,
         "sourceTobeolRaw": "143015298977",
-        "serverTobeolRank": 277,
-        "tobeolRank": 277,
-        "serverRaidRankAdvantage": 310,
-        "raidRankAdvantage": 310,
-        "tobeolValue": 143015298977
+        "currentWeekTobeolValue": 0,
+        "tobeolCarryoverDetected": true,
+        "serverTobeolRank": null,
+        "tobeolRank": null,
+        "serverRaidRankAdvantage": null,
+        "raidRankAdvantage": null,
+        "tobeolValue": 0
       },
       {
         "nickname": "니똥칼라똥",
@@ -2885,11 +2933,13 @@
         "powerRank": 598,
         "sourceTobeolValue": 65510517905,
         "sourceTobeolRaw": "65510517905",
-        "serverTobeolRank": 625,
-        "tobeolRank": 625,
-        "serverRaidRankAdvantage": -27,
-        "raidRankAdvantage": -27,
-        "tobeolValue": 65510517905
+        "currentWeekTobeolValue": 0,
+        "tobeolCarryoverDetected": true,
+        "serverTobeolRank": null,
+        "tobeolRank": null,
+        "serverRaidRankAdvantage": null,
+        "raidRankAdvantage": null,
+        "tobeolValue": 0
       },
       {
         "nickname": "아크리찌",
@@ -2904,11 +2954,13 @@
         "powerRank": 822,
         "sourceTobeolValue": 77354457853,
         "sourceTobeolRaw": "77354457853",
-        "serverTobeolRank": 552,
-        "tobeolRank": 552,
-        "serverRaidRankAdvantage": 270,
-        "raidRankAdvantage": 270,
-        "tobeolValue": 77354457853
+        "currentWeekTobeolValue": 0,
+        "tobeolCarryoverDetected": true,
+        "serverTobeolRank": null,
+        "tobeolRank": null,
+        "serverRaidRankAdvantage": null,
+        "raidRankAdvantage": null,
+        "tobeolValue": 0
       },
       {
         "nickname": "물주세요",
@@ -2923,11 +2975,13 @@
         "powerRank": 856,
         "sourceTobeolValue": 100536042842,
         "sourceTobeolRaw": "100536042842",
-        "serverTobeolRank": 459,
-        "tobeolRank": 459,
-        "serverRaidRankAdvantage": 397,
-        "raidRankAdvantage": 397,
-        "tobeolValue": 100536042842
+        "currentWeekTobeolValue": 0,
+        "tobeolCarryoverDetected": true,
+        "serverTobeolRank": null,
+        "tobeolRank": null,
+        "serverRaidRankAdvantage": null,
+        "raidRankAdvantage": null,
+        "tobeolValue": 0
       },
       {
         "nickname": "연뉴",
@@ -2942,11 +2996,13 @@
         "powerRank": 867,
         "sourceTobeolValue": 88171536143,
         "sourceTobeolRaw": "88171536143",
-        "serverTobeolRank": 513,
-        "tobeolRank": 513,
-        "serverRaidRankAdvantage": 354,
-        "raidRankAdvantage": 354,
-        "tobeolValue": 88171536143
+        "currentWeekTobeolValue": 0,
+        "tobeolCarryoverDetected": true,
+        "serverTobeolRank": null,
+        "tobeolRank": null,
+        "serverRaidRankAdvantage": null,
+        "raidRankAdvantage": null,
+        "tobeolValue": 0
       },
       {
         "nickname": "엔부리",
@@ -2961,11 +3017,13 @@
         "powerRank": 880,
         "sourceTobeolValue": 58118710454,
         "sourceTobeolRaw": "58118710454",
-        "serverTobeolRank": 697,
-        "tobeolRank": 697,
-        "serverRaidRankAdvantage": 183,
-        "raidRankAdvantage": 183,
-        "tobeolValue": 58118710454
+        "currentWeekTobeolValue": 0,
+        "tobeolCarryoverDetected": true,
+        "serverTobeolRank": null,
+        "tobeolRank": null,
+        "serverRaidRankAdvantage": null,
+        "raidRankAdvantage": null,
+        "tobeolValue": 0
       },
       {
         "nickname": "잔디궁",
@@ -2980,11 +3038,13 @@
         "powerRank": 920,
         "sourceTobeolValue": 62198129270,
         "sourceTobeolRaw": "62198129270",
-        "serverTobeolRank": 663,
-        "tobeolRank": 663,
-        "serverRaidRankAdvantage": 257,
-        "raidRankAdvantage": 257,
-        "tobeolValue": 62198129270
+        "currentWeekTobeolValue": 0,
+        "tobeolCarryoverDetected": true,
+        "serverTobeolRank": null,
+        "tobeolRank": null,
+        "serverRaidRankAdvantage": null,
+        "raidRankAdvantage": null,
+        "tobeolValue": 0
       }
     ]
   }

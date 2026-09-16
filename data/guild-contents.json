@@ -1,7 +1,7 @@
 {
   "version": 2,
-  "capturedAt": "2026-09-16 20:24:42",
-  "capturedDate": "2026-09-16",
+  "capturedAt": "2026-09-17 01:01:52",
+  "capturedDate": "2026-09-17",
   "source": "MGF.GG guild content cards",
   "sourceCapabilities": {
     "matchGroup": {
@@ -24,7 +24,7 @@
           "scoreStatus": "source_not_provided",
           "currentGuildScoreText": null,
           "currentGuildScoreValue": null,
-          "previousCaptureDate": "2026-09-15",
+          "previousCaptureDate": "2026-09-16",
           "previousGuildScoreText": null,
           "previousGuildScoreValue": null,
           "guilds": [
@@ -218,7 +218,7 @@
           "scoreStatus": "source_not_provided",
           "currentGuildScoreText": null,
           "currentGuildScoreValue": null,
-          "previousCaptureDate": "2026-09-15",
+          "previousCaptureDate": "2026-09-16",
           "previousGuildScoreText": null,
           "previousGuildScoreValue": null,
           "guilds": [
@@ -484,7 +484,7 @@
           "scoreStatus": "source_not_provided",
           "currentGuildScoreText": null,
           "currentGuildScoreValue": null,
-          "previousCaptureDate": "2026-09-15",
+          "previousCaptureDate": "2026-09-16",
           "previousGuildScoreText": null,
           "previousGuildScoreValue": null,
           "guilds": [
@@ -528,7 +528,7 @@
               "name": "슥샥쇽",
               "master": "Vzl존신궁V",
               "server": "Scania 11",
-              "powerText": "2경 9,783조 8,884억",
+              "powerText": "3경 4,326조 887억",
               "scoreText": null,
               "scoreValue": null,
               "scoreAvailable": false,
@@ -536,17 +536,17 @@
                 {
                   "rank": 1,
                   "nickname": "라스웅",
-                  "powerText": "7,195조 9,656억 696만"
+                  "powerText": "7,198조 9,670억 737만"
                 },
                 {
                   "rank": 2,
-                  "nickname": "Vzl존신궁V",
-                  "powerText": "3,764조 9,498억 1,673만"
+                  "nickname": "우엘리",
+                  "powerText": "3,876조 5,497억 1,255만"
                 },
                 {
                   "rank": 3,
-                  "nickname": "우엘리",
-                  "powerText": "3,495조 3,791억 3,841만"
+                  "nickname": "Vzl존신궁V",
+                  "powerText": "3,854조 638억 4,149만"
                 },
                 {
                   "rank": 4,
@@ -556,7 +556,7 @@
                 {
                   "rank": 5,
                   "nickname": "김토묘",
-                  "powerText": "2,806조 1,375억 8,693만"
+                  "powerText": "2,815조 5,569억 4,272만"
                 }
               ]
             }
