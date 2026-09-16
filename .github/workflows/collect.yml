@@ -2,9 +2,17 @@ name: Collect Dashboard Data
 
 on:
   workflow_dispatch:
+  push:
+    branches: [main]
+    paths:
+      - "scripts/mgf-parser.js"
+      - "scripts/collect-data.js"
+      - ".github/workflows/collect.yml"
   schedule:
     # 매일 KST 02:10 실행 = UTC 17:10 (MGF 기준일이 갱신된 뒤 수집)
     - cron: "10 17 * * *"
+    # 일요일 종료 직전 기록 보존 = KST 23:20 / 23:40 / 23:55
+    - cron: "20,40,55 14 * * 0"
 
 permissions:
   contents: write

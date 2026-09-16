@@ -3,6 +3,7 @@ import path from "node:path";
 import { fileURLToPath } from "node:url";
 import {
   addDays,
+  calculateRaidScoreDifference,
   findPowerComparisonSnapshot,
   findRaidSnapshot,
   formatKoreanPower,
@@ -108,21 +109,13 @@ async function run() {
     const finalRaidSnapshot = findRaidSnapshot(history, guild, previousWeekKey, { finalOnly: true });
     const raidSnapshot = finalRaidSnapshot || findRaidSnapshot(history, guild, previousWeekKey, { finalOnly: false });
     const raidMap = memberMap(raidSnapshot);
-    raidHistoryByGuild[guild] = raidPeriod.isFinal
-      ? {
-          currentWeekKey: raidPeriod.currentWeekKey,
-          previousWeekKey,
-          snapshotDate: sourceDataDate,
-          isFinal: true,
-          status: "final"
-        }
-      : {
-          currentWeekKey: raidPeriod.currentWeekKey,
-          previousWeekKey,
-          snapshotDate: raidSnapshot?.sourceDataDate || raidSnapshot?.date || null,
-          isFinal: Boolean(finalRaidSnapshot),
-          status: finalRaidSnapshot ? "final" : raidSnapshot ? "latest_capture" : "not_collected"
-        };
+    raidHistoryByGuild[guild] = {
+      currentWeekKey: raidPeriod.currentWeekKey,
+      previousWeekKey,
+      snapshotDate: raidSnapshot?.sourceDataDate || raidSnapshot?.date || null,
+      isFinal: Boolean(finalRaidSnapshot),
+      status: finalRaidSnapshot ? "sunday_final" : raidSnapshot ? "latest_available" : "not_collected"
+    };
 
     const currentNicknames = new Set(members.map((member) => member.nickname));
     for (const previous of powerSnapshot?.members || []) {
@@ -141,12 +134,10 @@ async function run() {
     for (const member of members) {
       const previousPower = powerMap.get(member.nickname) || null;
       const historyRaid = raidMap.get(member.nickname) || null;
-      const isMondayFinal = raidPeriod.kind === "previous_week_final";
       const sourceTobeolValue = Number(member.tobeolValue || 0);
-      const currentWeekTobeolValue = isMondayFinal ? null : sourceTobeolValue;
-      const lastWeekTobeolValue = isMondayFinal
-        ? sourceTobeolValue
-        : nullableNumber(historyRaid?.sourceTobeolValue ?? historyRaid?.tobeolValue);
+      const currentWeekTobeolValue = sourceTobeolValue;
+      const lastWeekTobeolValue = nullableNumber(historyRaid?.sourceTobeolValue ?? historyRaid?.tobeolValue);
+      const tobeolDifference = calculateRaidScoreDifference(currentWeekTobeolValue, lastWeekTobeolValue);
       const powerGrowthValue = previousPower
         ? Number(member.powerValue || 0) - Number(previousPower.powerValue || 0)
         : null;
@@ -181,14 +172,14 @@ async function run() {
         currentWeekTobeolText: currentWeekTobeolValue == null ? null : formatKoreanPower(currentWeekTobeolValue),
         lastWeekTobeolValue,
         lastWeekTobeolText: lastWeekTobeolValue == null ? null : formatKoreanPower(lastWeekTobeolValue),
-        lastWeekTobeolIsFinal: isMondayFinal || Boolean(finalRaidSnapshot),
+        lastWeekTobeolIsFinal: Boolean(finalRaidSnapshot),
         tobeolValue: sourceTobeolValue,
         tobeolText: member.tobeolText,
         previousTobeolValue: lastWeekTobeolValue,
         previousTobeolText: lastWeekTobeolValue == null ? null : formatKoreanPower(lastWeekTobeolValue),
-        tobeolGrowthValue: null,
-        tobeolGrowthText: null,
-        tobeolGrowthRate: null,
+        tobeolGrowthValue: tobeolDifference.value,
+        tobeolGrowthText: tobeolDifference.value == null ? null : formatSignedKoreanPower(tobeolDifference.value),
+        tobeolGrowthRate: tobeolDifference.rate,
         rankScope: "server",
         serverName: result.parsed.serverName || `Scania ${result.parsed.serverId}`,
         serverPowerRank,
@@ -209,7 +200,7 @@ async function run() {
   const latest = {
     ok: true,
     version: 8,
-    appVersion: "v2.4.0",
+    appVersion: "v2.5.1",
     guilds: guildNames,
     guild: guildNames.join(" · "),
     capturedDate,
@@ -382,6 +373,12 @@ function applyManualOverrides(members, manual, capturedDate) {
       member.previousTobeolValue = member.lastWeekTobeolValue;
       member.previousTobeolText = member.lastWeekTobeolText;
       changed = true;
+    }
+    if (hasManualValue(item, "tobeol") || hasManualValue(item, "previousTobeol")) {
+      const difference = calculateRaidScoreDifference(member.currentWeekTobeolValue, member.lastWeekTobeolValue);
+      member.tobeolGrowthValue = difference.value;
+      member.tobeolGrowthText = difference.value == null ? null : formatSignedKoreanPower(difference.value);
+      member.tobeolGrowthRate = difference.rate;
     }
     if (changed) {
       member.powerGrowthValue = member.previousPowerValue == null ? null : member.powerValue - member.previousPowerValue;

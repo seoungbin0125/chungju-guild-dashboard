@@ -3,7 +3,7 @@ set -euo pipefail
 
 cd "$(dirname "$0")"
 
-echo "충주시 길드 대시보드 v2.4.0 업데이트 업로드"
+echo "충주시 길드 대시보드 v2.5.1 업데이트 업로드"
 if [[ ! -d .git ]]; then
   echo "이 폴더는 아직 GitHub 저장소와 연결되지 않았습니다. PUSH_TO_GITHUB.command를 먼저 실행해주세요."
   read -r -p "Enter를 누르면 종료합니다."
@@ -14,7 +14,7 @@ git add .
 if git diff --cached --quiet; then
   echo "새로 커밋할 변경 사항은 없습니다. 원격 변경을 확인합니다."
 else
-  git commit -m "feat: add raid efficiency and manual guild war scores"
+  git commit -m "fix: align raid week with Monday through Sunday"
 fi
 
 echo "GitHub의 최신 변경 사항과 합치는 중..."

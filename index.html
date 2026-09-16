@@ -3,15 +3,15 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>충주시 길드 운영실 v2.4.0</title>
+  <title>충주시 길드 운영실 v2.5.1</title>
   <meta name="theme-color" content="#073b4c" />
-  <link rel="stylesheet" href="src/style.css?v=2.4.0" />
+  <link rel="stylesheet" href="src/style.css?v=2.5.1" />
 </head>
 <body>
   <main class="page">
     <section class="hero">
       <div>
-        <p class="eyebrow">Chungju Guild Operations <span class="version-pill">v2.4.0</span></p>
+        <p class="eyebrow">Chungju Guild Operations <span class="version-pill">v2.5.1</span></p>
         <h1 id="title">충주시 길드 운영실</h1>
         <p id="subtitle" class="hidden-subtitle"></p>
       </div>
@@ -31,6 +31,7 @@
         <button class="main-tab" data-page="live-tobeol" type="button">토벌전</button>
         <button class="main-tab" data-page="efficiency" type="button">효율</button>
         <button class="main-tab" data-page="contents" type="button">대항전</button>
+        <button class="main-tab" data-page="virtual" type="button">광장</button>
         <button class="main-tab" data-page="guide" type="button">공략</button>
       </div>
     </section>
@@ -132,9 +133,9 @@
     <section class="content-page" id="page-virtual">
       <section class="virtual-layout">
         <article class="virtual-card virtual-intro">
-          <p class="eyebrow mini">Virtual Plaza</p>
-          <h2>길드 버츄얼 광장</h2>
-          <p class="muted">메이플 느낌의 긴 2D 광장에서 캐릭터를 움직이고, 채팅과 스킬 장난을 할 수 있습니다.</p>
+          <p class="eyebrow mini">Chungju Plaza</p>
+          <h2>충주시 길드 광장</h2>
+          <p class="muted">길드 캐릭터로 입장해 산책하고, 대화하고, 가볍게 스킬 장난도 즐겨보세요.</p>
           <div class="virtual-status" id="virtual-status">광장 연결 확인 중...</div>
 
           <label class="virtual-picker">
@@ -162,8 +163,8 @@
         <section class="virtual-stage-card">
           <div class="virtual-stage-top">
             <div>
-              <p class="eyebrow mini">Guild Plaza</p>
-              <h2>헤네시스 광장풍 놀이터</h2>
+              <p class="eyebrow mini">Lake Plaza</p>
+              <h2>충주 호수광장</h2>
             </div>
             <span class="online-pill">접속 <strong id="virtual-online-count">0명</strong></span>
           </div>
@@ -172,6 +173,8 @@
             <div class="stage-decoration deco-1"></div>
             <div class="stage-decoration deco-2"></div>
             <div class="stage-skyline" aria-hidden="true"></div>
+            <div class="stage-lake" aria-hidden="true"></div>
+            <div class="stage-bridge" aria-hidden="true"><span>충주시</span></div>
             <div class="stage-platform platform-1" aria-hidden="true"></div>
             <div class="stage-platform platform-2" aria-hidden="true"></div>
             <div class="stage-platform platform-3" aria-hidden="true"></div>
@@ -202,11 +205,16 @@
         <aside class="virtual-chat-panel">
           <div class="panel-header compact">
             <div>
-              <h2>광장 채팅</h2>
-              <p>입장한 캐릭터 이름으로 메시지가 표시됩니다.</p>
+              <h2>광장 이야기</h2>
+              <p>선택한 길드 캐릭터 이름으로 대화가 기록됩니다.</p>
             </div>
           </div>
           <div class="virtual-chat-list" id="virtual-chat-list"></div>
+          <div class="virtual-quick-chat" aria-label="빠른 채팅">
+            <button type="button" data-virtual-quick="반가워요 👋">👋 인사</button>
+            <button type="button" data-virtual-quick="오늘도 토벌 가자! ⚔️">⚔️ 토벌</button>
+            <button type="button" data-virtual-quick="수고했어요 🎉">🎉 칭찬</button>
+          </div>
           <div class="virtual-chat-form">
             <input id="virtual-chat-input" type="text" maxlength="120" placeholder="메시지 입력" disabled />
             <button class="primary-btn" id="virtual-chat-send" type="button" disabled>전송</button>
@@ -265,16 +273,16 @@
       <section class="efficiency-hero">
         <div>
           <p class="eyebrow mini">Raid Efficiency</p>
-          <h2>토벌 효율 분석</h2>
-          <p>전투력 규모와 직업 차이를 함께 반영해 길드원별 토벌 성과를 비교합니다.</p>
+          <h2>서버 순위 효율</h2>
+          <p>Scania 4 전체 서버의 전투력 순위와 토벌 순위를 직접 비교합니다.</p>
         </div>
         <label class="efficiency-sort-control">
           정렬
           <select id="efficiency-sort">
-            <option value="efficiency">효율 높은순</option>
-            <option value="attention">점검 우선순</option>
-            <option value="score">실제점수 높은순</option>
-            <option value="power">전투력 높은순</option>
+            <option value="efficiency">순위 효율 높은순</option>
+            <option value="attention">순위 효율 낮은순</option>
+            <option value="raid-rank">서버 토벌 순위순</option>
+            <option value="power-rank">서버 투력 순위순</option>
           </select>
         </label>
       </section>
@@ -285,28 +293,18 @@
       <section class="efficiency-panel">
         <div class="efficiency-panel-header">
           <div>
-            <h2>길드원 효율표</h2>
-            <p>현재 수집된 전투력과 토벌 점수를 기준으로 표시합니다.</p>
+            <h2>서버 순위 비교표</h2>
+            <p>직업 보정 없이 서버 순위만 비교합니다.</p>
           </div>
           <span class="period-chip" id="efficiency-period">기준일 확인 중</span>
         </div>
         <div class="efficiency-table-wrap">
           <div class="efficiency-table-head">
-            <span>순위</span><span>길드원</span><span>전투력</span><span>실제점수</span><span>기대점수</span><span>효율지수</span><span>판정</span>
+            <span>효율순위</span><span>길드원</span><span>서버 투력</span><span>서버 토벌</span><span>순위차</span><span>순위효율</span><span>판정</span>
           </div>
           <div class="efficiency-list" id="efficiency-list"></div>
         </div>
-        <p class="efficiency-notice">길드 내부의 상대 비교 지표입니다. 참여 시간이나 프리셋 실수가 있었다면 다음 기록과 함께 확인해주세요.</p>
-      </section>
-
-      <section class="efficiency-job-panel">
-        <div class="efficiency-panel-header">
-          <div>
-            <h2>직업별 기준 멤버</h2>
-            <p>같은 직업에서 효율이 가장 높은 길드원을 확인합니다.</p>
-          </div>
-        </div>
-        <div class="efficiency-job-grid" id="efficiency-job-grid"></div>
+        <p class="efficiency-notice">Scania 4 서버 전체 순위 기준 · 직업 보정 없음</p>
       </section>
     </section>
 
@@ -410,11 +408,12 @@
       <button class="main-tab bottom-tab" data-page="live-tobeol" type="button"><span>⚔️</span><b>토벌전</b></button>
       <button class="main-tab bottom-tab" data-page="efficiency" type="button"><span>📊</span><b>효율</b></button>
       <button class="main-tab bottom-tab" data-page="contents" type="button"><span>🧭</span><b>대항전</b></button>
+      <button class="main-tab bottom-tab" data-page="virtual" type="button"><span>🌊</span><b>광장</b></button>
       <button class="main-tab bottom-tab" data-page="guide" type="button"><span>📜</span><b>공략</b></button>
     </nav>
 
     <footer class="hidden-footer">
-      <span id="footer-text">데이터 로딩 중...</span><span class="footer-version">v2.4.0</span>
+      <span id="footer-text">데이터 로딩 중...</span><span class="footer-version">v2.5.1</span>
     </footer>
   </main>
 
@@ -573,6 +572,6 @@
     </form>
   </dialog>
 
-  <script type="module" src="src/main.js?v=2.4.0"></script>
+  <script type="module" src="src/main.js?v=2.5.1"></script>
 </body>
 </html>

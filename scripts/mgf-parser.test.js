@@ -2,6 +2,7 @@ import test from "node:test";
 import assert from "node:assert/strict";
 import {
   addMemberRankComparison,
+  calculateRaidScoreDifference,
   findPowerComparisonSnapshot,
   findRaidSnapshot,
   getRaidPeriod,
@@ -70,24 +71,45 @@ test("현재 MGF 길드 콘텐츠 카드 구조를 파싱하고 검색 길드를
   assert.equal(parsed.scoreAvailable, false);
 });
 
-test("월요일 점수는 지난주 확정, 화~일 점수는 이번주 진행으로 분류한다", () => {
+test("토벌 주차는 월요일에 시작하고 일요일에 종료한다", () => {
   const monday = getRaidPeriod("2026-09-07");
-  const wednesday = getRaidPeriod("2026-09-09");
-  assert.equal(monday.kind, "previous_week_final");
-  assert.equal(monday.scoreWeekKey, "2026-08-31");
-  assert.equal(monday.isFinal, true);
-  assert.equal(wednesday.kind, "current_week_live");
-  assert.equal(wednesday.scoreWeekKey, "2026-09-07");
-  assert.equal(wednesday.isFinal, false);
+  const sunday = getRaidPeriod("2026-09-13");
+  const nextMonday = getRaidPeriod("2026-09-14");
+  assert.equal(monday.kind, "current_week_live");
+  assert.equal(monday.scoreWeekKey, "2026-09-07");
+  assert.equal(monday.isFinal, false);
+  assert.equal(sunday.kind, "current_week_final");
+  assert.equal(sunday.scoreWeekKey, "2026-09-07");
+  assert.equal(sunday.weekEndDate, "2026-09-13");
+  assert.equal(sunday.isFinal, true);
+  assert.equal(nextMonday.scoreWeekKey, "2026-09-14");
+  assert.equal(nextMonday.isFinal, false);
 });
 
-test("토벌 이력은 날짜 뺄셈이 아니라 주차 키와 확정 여부로 선택한다", () => {
+test("지난주 토벌은 일요일 기록을 선택하고 잘못 분류된 월요일 기록은 제외한다", () => {
   const history = [
+    { guild: "충주시", sourceDataDate: "2026-09-05", raidPeriod: { scoreWeekKey: "2026-08-31", isFinal: false } },
     { guild: "충주시", sourceDataDate: "2026-09-06", raidPeriod: { scoreWeekKey: "2026-08-31", isFinal: false } },
     { guild: "충주시", sourceDataDate: "2026-09-07", raidPeriod: { scoreWeekKey: "2026-08-31", isFinal: true } },
     { guild: "충주시", sourceDataDate: "2026-09-08", raidPeriod: { scoreWeekKey: "2026-09-07", isFinal: false } }
   ];
-  assert.equal(findRaidSnapshot(history, "충주시", "2026-08-31")?.sourceDataDate, "2026-09-07");
+  assert.equal(findRaidSnapshot(history, "충주시", "2026-08-31")?.sourceDataDate, "2026-09-06");
+});
+
+test("일요일 기록이 없으면 지난주 마지막 수집본을 사용하되 확정으로 표시하지 않는다", () => {
+  const history = [
+    { guild: "충주시", sourceDataDate: "2026-09-04", capturedAt: "2026-09-04 02:10:00", raidPeriod: { scoreWeekKey: "2026-08-31" } },
+    { guild: "충주시", sourceDataDate: "2026-09-05", capturedAt: "2026-09-05 02:10:00", raidPeriod: { scoreWeekKey: "2026-08-31" } }
+  ];
+  assert.equal(findRaidSnapshot(history, "충주시", "2026-08-31", { finalOnly: true }), null);
+  assert.equal(findRaidSnapshot(history, "충주시", "2026-08-31", { finalOnly: false })?.sourceDataDate, "2026-09-05");
+});
+
+test("이번 주 누적 점수와 지난주 점수의 차이와 비율을 계산한다", () => {
+  assert.deepEqual(calculateRaidScoreDifference(150, 100), { value: 50, rate: 50 });
+  assert.deepEqual(calculateRaidScoreDifference(80, 100), { value: -20, rate: -20 });
+  assert.deepEqual(calculateRaidScoreDifference(0, 0), { value: 0, rate: null });
+  assert.deepEqual(calculateRaidScoreDifference(100, null), { value: null, rate: null });
 });
 
 test("전투력 7일 비교는 누락일이 있어도 목표일 근처 2일 이내를 사용한다", () => {

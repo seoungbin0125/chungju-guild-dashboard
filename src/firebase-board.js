@@ -5,6 +5,7 @@ import {
   deleteDoc,
   doc,
   getFirestore,
+  limit,
   onSnapshot,
   orderBy,
   query,
@@ -170,7 +171,7 @@ export function createVirtualLobbyClient({
   const db = getFirestore(app);
   const participantsRef = collection(db, collectionName, "plaza", "participants");
   const messagesRef = collection(db, collectionName, "plaza", "messages");
-  const messagesQuery = query(messagesRef, orderBy("createdAt", "asc"));
+  const messagesQuery = query(messagesRef, orderBy("createdAt", "desc"), limit(80));
 
   onStatus?.("connecting", "버츄얼 광장 연결 중...");
 
@@ -190,7 +191,7 @@ export function createVirtualLobbyClient({
   const unsubscribeMessages = onSnapshot(
     messagesQuery,
     (snapshot) => {
-      const messages = snapshot.docs.map((item) => normalizeVirtualMessage(item.id, item.data())).slice(-80);
+      const messages = snapshot.docs.map((item) => normalizeVirtualMessage(item.id, item.data())).reverse();
       onMessages?.(messages);
     },
     (error) => {

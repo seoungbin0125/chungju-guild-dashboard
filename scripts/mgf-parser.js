@@ -119,29 +119,53 @@ export function getRaidPeriod(dateString) {
   const day = date.getUTCDay();
   const daysSinceMonday = (day + 6) % 7;
   const currentWeekKey = addDays(sourceDate, -daysSinceMonday);
-  const isMondaySnapshot = day === 1;
-  const scoreWeekKey = isMondaySnapshot ? addDays(currentWeekKey, -7) : currentWeekKey;
+  const isWeekEnd = day === 0;
 
   return {
     sourceDate,
     currentWeekKey,
-    scoreWeekKey,
-    kind: isMondaySnapshot ? "previous_week_final" : "current_week_live",
-    isFinal: isMondaySnapshot,
-    metricLabel: isMondaySnapshot ? "지난주 토벌 확정" : "이번 주 토벌 진행",
-    description: isMondaySnapshot
-      ? `${scoreWeekKey} 주차의 지난주 확정 점수`
-      : `${scoreWeekKey} 주차의 현재 누적 점수`
+    scoreWeekKey: currentWeekKey,
+    weekEndDate: addDays(currentWeekKey, 6),
+    kind: isWeekEnd ? "current_week_final" : "current_week_live",
+    isFinal: isWeekEnd,
+    metricLabel: isWeekEnd ? "이번 주 토벌 마감일" : "이번 주 토벌 진행",
+    description: isWeekEnd
+      ? `${currentWeekKey} 주차의 일요일 마감 기록`
+      : `${currentWeekKey} 주차의 현재 누적 점수`
   };
 }
 
 export function findRaidSnapshot(history, guild, scoreWeekKey, { finalOnly = true } = {}) {
+  const normalizedWeekKey = normalizeDate(scoreWeekKey);
+  if (!normalizedWeekKey) return null;
+  const weekEndDate = addDays(normalizedWeekKey, 6);
   const candidates = (Array.isArray(history) ? history : [])
     .filter((snapshot) => snapshot?.guild === guild)
-    .filter((snapshot) => snapshot?.raidPeriod?.scoreWeekKey === scoreWeekKey)
-    .filter((snapshot) => !finalOnly || snapshot?.raidPeriod?.isFinal)
-    .sort((a, b) => String(b.sourceDataDate || b.date || "").localeCompare(String(a.sourceDataDate || a.date || "")));
+    .filter((snapshot) => snapshot?.raidPeriod?.scoreWeekKey === normalizedWeekKey)
+    .filter((snapshot) => {
+      const snapshotDate = normalizeDate(snapshot?.sourceDataDate || snapshot?.date);
+      return snapshotDate && snapshotDate >= normalizedWeekKey && snapshotDate <= weekEndDate;
+    })
+    .filter((snapshot) => !finalOnly || normalizeDate(snapshot?.sourceDataDate || snapshot?.date) === weekEndDate)
+    .sort((a, b) => {
+      const dateOrder = String(b.sourceDataDate || b.date || "").localeCompare(String(a.sourceDataDate || a.date || ""));
+      return dateOrder || String(b.capturedAt || "").localeCompare(String(a.capturedAt || ""));
+    });
   return candidates[0] || null;
+}
+
+export function calculateRaidScoreDifference(currentValue, previousValue) {
+  if (currentValue == null || previousValue == null || currentValue === "" || previousValue === "") {
+    return { value: null, rate: null };
+  }
+  const current = Number(currentValue);
+  const previous = Number(previousValue);
+  if (!Number.isFinite(current) || !Number.isFinite(previous)) return { value: null, rate: null };
+  const value = current - previous;
+  const rate = previous === 0
+    ? null
+    : Number(((value / previous) * 100).toFixed(2));
+  return { value, rate };
 }
 
 export function findPowerComparisonSnapshot(history, guild, targetDate, maxDistanceDays = 2) {

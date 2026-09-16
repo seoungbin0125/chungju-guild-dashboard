@@ -3,7 +3,7 @@ import { createGuideBoardClient, createJellyGameClient, createManualOverrideClie
 import { calculateRaidEfficiency } from "./raid-efficiency.js";
 import { mergeGuildWarManualData, normalizeGuildWarScoreInput } from "./guild-war-manual.js";
 
-const APP_VERSION = "v2.4.0";
+const APP_VERSION = "v2.5.1";
 const LIVE_TOBEOL_API_ORIGIN = "https://chungju-guild-dashboard.pages.dev";
 const EDIT_PASSWORD = "5645";
 const LOCAL_MANUAL_KEY = "chungju-guild-dashboard.manual.v1";
@@ -157,6 +157,7 @@ const refs = {
   virtualChatList: document.getElementById("virtual-chat-list"),
   virtualChatInput: document.getElementById("virtual-chat-input"),
   virtualChatSend: document.getElementById("virtual-chat-send"),
+  virtualQuickChatButtons: document.querySelectorAll("[data-virtual-quick]"),
   virtualNudgeButtons: document.querySelectorAll("[data-virtual-move]"),
   gameStatus: document.getElementById("game-status"),
   gameCharacterSelect: document.getElementById("game-character-select"),
@@ -439,6 +440,9 @@ function bindEvents() {
       event.preventDefault();
       sendVirtualChat();
     }
+  });
+  refs.virtualQuickChatButtons?.forEach((button) => {
+    button.addEventListener("click", () => sendVirtualQuickChat(button.dataset.virtualQuick || ""));
   });
   refs.virtualNudgeButtons?.forEach((button) => {
     button.addEventListener("click", () => nudgeVirtualAvatar(button.dataset.virtualMove));
@@ -1105,21 +1109,21 @@ function renderEfficiencyPage() {
   const attention = summary.needsAttention;
   refs.efficiencyHighlights.innerHTML = [
     {
-      label: "최상위 효율",
-      value: best ? `${best.nickname} · ${best.efficiencyIndex}` : "집계 전",
-      detail: best ? `${best.job || "-"} · ${best.efficiencyGrade.label}` : "참여 점수가 필요합니다.",
+      label: "최고 순위 효율",
+      value: best ? `${best.nickname} · ${formatRankGainRate(best.efficiencyIndex)}` : "집계 전",
+      detail: best ? `투력 ${formatServerRank(best.serverPowerRank)} → 토벌 ${formatServerRank(best.serverTobeolRank)}` : "서버 순위가 필요합니다.",
       tone: "best"
     },
     {
       label: "우선 확인",
-      value: attention ? `${attention.nickname} · ${attention.efficiencyIndex}` : "집계 전",
-      detail: attention ? `${attention.job || "-"} · ${attention.efficiencyGrade.label}` : "참여 점수가 필요합니다.",
+      value: attention ? `${attention.nickname} · ${formatRankGainRate(attention.efficiencyIndex)}` : "집계 전",
+      detail: attention ? `투력 ${formatServerRank(attention.serverPowerRank)} → 토벌 ${formatServerRank(attention.serverTobeolRank)}` : "서버 순위가 필요합니다.",
       tone: "attention"
     },
     {
-      label: "분석 인원",
+      label: "서버 순위 확인",
       value: `${summary.participantCount}/${summary.rosterCount}명`,
-      detail: summary.participantCount === summary.rosterCount ? "전체 길드원 반영" : `미집계 ${summary.rosterCount - summary.participantCount}명`,
+      detail: `토벌 우위 ${summary.aheadCount}명 · 동일 ${summary.equalCount}명 · 하위 ${summary.behindCount}명`,
       tone: "people"
     }
   ].map((item) => `
@@ -1131,8 +1135,7 @@ function renderEfficiencyPage() {
   `).join("");
 
   if (refs.efficiencyPeriod) {
-    const period = state.data?.raidPeriod || {};
-    refs.efficiencyPeriod.textContent = `${state.data?.sourceDataDate || state.data?.capturedDate || "-"} · ${period.metricLabel || "토벌 기록"}`;
+    refs.efficiencyPeriod.textContent = `${state.data?.sourceDataDate || state.data?.capturedDate || "-"} · Scania 4 서버 순위`;
   }
 
   const entries = sortEfficiencyEntries(analysis.entries, state.efficiencySort);
@@ -1140,17 +1143,6 @@ function renderEfficiencyPage() {
     ? entries.map(renderEfficiencyRow).join("")
     : `<div class="efficiency-empty">표시할 토벌 데이터가 없습니다.</div>`;
 
-  if (refs.efficiencyJobGrid) {
-    refs.efficiencyJobGrid.innerHTML = analysis.jobs.length
-      ? analysis.jobs.map((job) => `
-          <article class="efficiency-job-card">
-            <div><strong>${escapeHtml(job.job)}</strong><span>${job.count}명</span></div>
-            <p>기준 멤버 <b>${escapeHtml(job.bestNickname)}</b></p>
-            <small>직업 내 최고 효율 ${escapeHtml(job.bestIndex ?? "-")}</small>
-          </article>
-        `).join("")
-      : `<div class="efficiency-empty">직업별로 비교할 데이터가 없습니다.</div>`;
-  }
   refs.footerText.textContent = "";
 }
 
@@ -1165,8 +1157,8 @@ function sortEfficiencyEntries(entries, mode) {
     return (Number(left) - Number(right)) * direction;
   };
   if (mode === "attention") return list.sort((a, b) => missingLast(a, b, (item) => item.efficiencyIndex, 1));
-  if (mode === "score") return list.sort((a, b) => missingLast(a, b, (item) => item.efficiencyRaid, -1));
-  if (mode === "power") return list.sort((a, b) => missingLast(a, b, (item) => item.efficiencyPower, -1));
+  if (mode === "raid-rank") return list.sort((a, b) => missingLast(a, b, (item) => item.serverTobeolRank, 1));
+  if (mode === "power-rank") return list.sort((a, b) => missingLast(a, b, (item) => item.serverPowerRank, 1));
   return list.sort((a, b) => missingLast(a, b, (item) => item.efficiencyIndex, -1));
 }
 
@@ -1180,13 +1172,37 @@ function renderEfficiencyRow(member) {
         <strong>${escapeHtml(member.nickname || "-")}</strong>
         <small>${escapeHtml(member.job || "-")} · Lv.${escapeHtml(member.level || "-")}</small>
       </div>
-      <div class="efficiency-metric power"><span>전투력</span><strong>${escapeHtml(compactPowerText(member.powerText, member.efficiencyPower))}</strong></div>
-      <div class="efficiency-metric actual"><span>실제점수</span><strong>${escapeHtml(member.efficiencyRaid > 0 ? formatKoreanPower(member.efficiencyRaid) : "미참여")}</strong></div>
-      <div class="efficiency-metric expected"><span>기대점수</span><strong>${escapeHtml(hasEfficiency ? formatKoreanPower(member.expectedTobeolValue) : "—")}</strong></div>
-      <strong class="efficiency-index">${escapeHtml(hasEfficiency ? member.efficiencyIndex.toFixed(1) : "—")}</strong>
+      <div class="efficiency-metric power"><span>투력 ${escapeHtml(compactPowerText(member.powerText, member.powerValue))}</span><strong>${escapeHtml(formatServerRank(member.serverPowerRank))}</strong></div>
+      <div class="efficiency-metric actual"><span>점수 ${escapeHtml(member.tobeolValue > 0 ? formatKoreanPower(member.tobeolValue) : "미참여")}</span><strong>${escapeHtml(formatServerRank(member.serverTobeolRank))}</strong></div>
+      <div class="efficiency-metric expected ${escapeAttr(rankAdvantageClass(member.rankAdvantage))}"><span>서버 순위차</span><strong>${escapeHtml(formatRankAdvantage(member.rankAdvantage))}</strong></div>
+      <strong class="efficiency-index ${escapeAttr(rankAdvantageClass(member.efficiencyIndex))}">${escapeHtml(hasEfficiency ? formatRankGainRate(member.efficiencyIndex) : "—")}</strong>
       <span class="efficiency-grade ${escapeAttr(grade.key)}">${escapeHtml(grade.label)}</span>
     </article>
   `;
+}
+
+function formatServerRank(value) {
+  const rank = Number(value);
+  return Number.isInteger(rank) && rank > 0 ? `${numberFormat(rank)}위` : "—";
+}
+
+function formatRankAdvantage(value) {
+  const gap = Number(value);
+  if (!Number.isFinite(gap)) return "—";
+  if (gap === 0) return "동일";
+  return `${gap > 0 ? "+" : ""}${numberFormat(gap)}칸`;
+}
+
+function formatRankGainRate(value) {
+  const rate = Number(value);
+  if (!Number.isFinite(rate)) return "—";
+  return `${rate > 0 ? "+" : ""}${rate.toFixed(1)}%`;
+}
+
+function rankAdvantageClass(value) {
+  const number = Number(value);
+  if (!Number.isFinite(number) || number === 0) return "rank-even";
+  return number > 0 ? "rank-up" : "rank-down";
 }
 
 async function searchLiveTobeol() {
@@ -1278,9 +1294,8 @@ function renderLiveTobeolResults() {
 
   const summary = data.summary || {};
   const period = data.raidPeriod || {};
-  const isPreviousWeekFinal = period.kind === "previous_week_final";
-  const participationLabel = isPreviousWeekFinal ? "지난주 참여" : "이번 주 참여";
-  const missedLabel = isPreviousWeekFinal ? "지난주 미참여" : "이번 주 미참여";
+  const participationLabel = "이번 주 참여";
+  const missedLabel = "이번 주 미참여";
   const sourceMembers = Array.isArray(data.members) && data.members.length
     ? data.members
     : [...(data.hitMembers || []), ...(data.missedMembers || [])];
@@ -1318,7 +1333,7 @@ function renderLiveTobeolResults() {
     <article class="live-summary-card missed">
       <span>${missedLabel}</span>
       <strong>${Number(summary.missedCount || 0)}명</strong>
-      <small>${isPreviousWeekFinal ? "지난주 확정 점수 없음" : "현재 누적 점수 없음"}</small>
+      <small>현재 누적 점수 없음</small>
     </article>
     <article class="live-summary-card total">
       <span>${escapeHtml(period.metricLabel || "총 토벌전")}</span>
@@ -1339,9 +1354,8 @@ function renderLiveTobeolResults() {
 
 function renderLiveTobeolMember(member, type) {
   const isHit = type === "hit";
-  const isPreviousWeekFinal = state.liveTobeolData?.raidPeriod?.kind === "previous_week_final";
   const imageUrl = getCharacterImageUrl(member.nickname);
-  const statusText = isHit ? (isPreviousWeekFinal ? "지난주 참여" : "참여") : (isPreviousWeekFinal ? "지난주 미참여" : "미참여");
+  const statusText = isHit ? "참여" : "미참여";
   const powerRank = member.powerRank ?? null;
   const tobeolRank = member.tobeolRank ?? null;
   const scoreText = isHit ? (member.tobeolText || "0") : "—";
@@ -1580,7 +1594,7 @@ function renderSummary() {
   const summary = buildSummary(members);
   const avgPower = summary.memberCount ? Math.floor(summary.totalPowerValue / summary.memberCount) : 0;
   const raidPeriod = state.data?.raidPeriod || {};
-  const raidLabel = raidPeriod.kind === "previous_week_final" ? "지난주 토벌 확정" : "이번 주 토벌";
+  const raidLabel = raidPeriod.isFinal ? "이번 주 토벌 마감" : "이번 주 토벌";
   const cards = [
     { label: "길드원", value: `${summary.memberCount || 0}명`, icon: "👥", tone: "primary" },
     { label: "총 전투력", value: formatKoreanPower(summary.totalPowerValue || 0), icon: "⚡", tone: "featured" },
@@ -1609,9 +1623,8 @@ function renderWeeklyRaidList() {
   if (!refs.weeklyRaidList) return;
   const data = state.data || {};
   const period = data.raidPeriod || {};
-  const isPreviousWeekFinal = period.kind === "previous_week_final";
   const members = getGuildFilteredMembers()
-    .sort((a, b) => Number(b.sourceTobeolValue ?? b.tobeolValue ?? 0) - Number(a.sourceTobeolValue ?? a.tobeolValue ?? 0));
+    .sort((a, b) => Number(b.currentWeekTobeolValue ?? b.sourceTobeolValue ?? b.tobeolValue ?? 0) - Number(a.currentWeekTobeolValue ?? a.sourceTobeolValue ?? a.tobeolValue ?? 0));
   if (refs.raidPeriodChip) {
     refs.raidPeriodChip.textContent = `${period.metricLabel || "토벌 주차"} · ${period.scoreWeekKey || "-"}`;
   }
@@ -1620,24 +1633,41 @@ function renderWeeklyRaidList() {
     return;
   }
   refs.weeklyRaidList.innerHTML = `
-    <div class="weekly-raid-head"><span>길드원</span><span>${isPreviousWeekFinal ? "지난주 확정" : "이번 주 진행"}</span><span>${isPreviousWeekFinal ? "기록 상태" : "지난주 기록"}</span></div>
+    <div class="weekly-raid-head"><span>길드원</span><span>이번 주 누적</span><span>지난주 최종</span><span>현재−지난주</span></div>
     ${members.map((member, index) => {
-      const sourceScore = member.sourceTobeolValue ?? member.tobeolValue ?? 0;
+      const sourceScore = member.currentWeekTobeolValue ?? member.sourceTobeolValue ?? member.tobeolValue ?? 0;
       const lastWeek = member.lastWeekTobeolValue;
-      const lastWeekLabel = isPreviousWeekFinal && lastWeek != null
-        ? "이 주차 확정본으로 저장됨"
-        : lastWeek == null
+      const lastWeekLabel = lastWeek == null
         ? "지난주 기록 없음"
         : `${formatKoreanPower(lastWeek)}${member.lastWeekTobeolIsFinal ? " · 확정" : " · 최근 기록"}`;
+      const difference = raidWeekDifferenceMeta(member);
       return `
         <article class="weekly-raid-row">
           <span class="weekly-rank">${index + 1}</span>
           <div><strong>${escapeHtml(member.nickname || "-")}</strong><small>${escapeHtml(member.job || "-")} · Lv.${escapeHtml(member.level || "-")}</small></div>
           <b>${escapeHtml(formatKoreanPower(sourceScore))}</b>
           <em class="${lastWeek == null ? "is-empty" : ""}">${escapeHtml(lastWeekLabel)}</em>
+          <span class="weekly-difference ${escapeAttr(difference.className)}">${escapeHtml(difference.label)}</span>
         </article>`;
     }).join("")}
   `;
+}
+
+function raidWeekDifferenceMeta(member) {
+  const current = nullableNumber(member?.currentWeekTobeolValue ?? member?.sourceTobeolValue ?? member?.tobeolValue);
+  const previous = nullableNumber(member?.lastWeekTobeolValue);
+  if (current == null || previous == null) return { label: "비교 없음", className: "is-empty" };
+  const value = member?.tobeolGrowthValue == null
+    ? current - previous
+    : Number(member.tobeolGrowthValue);
+  const rate = member?.tobeolGrowthRate == null
+    ? calcGrowthRate(current, previous)
+    : Number(member.tobeolGrowthRate);
+  const rateText = Number.isFinite(rate) ? ` (${rate > 0 ? "+" : ""}${rate.toFixed(1)}%)` : "";
+  return {
+    label: `${formatSignedKoreanPower(value)}${rateText}`,
+    className: value > 0 ? "is-up" : value < 0 ? "is-down" : "is-zero"
+  };
 }
 
 function renderRankComparison() {
@@ -1754,7 +1784,7 @@ function renderVisualStats(members) {
     ["표시 인원", `${members.length}명`],
     ["전투력 1위", topPower ? `${topPower.nickname} · ${formatKoreanPower(topPower.powerValue)}` : "-"],
     ["평균 전투력 변화", avgPowerGrowth == null ? "비교 없음" : formatSignedKoreanPower(avgPowerGrowth)],
-    ["지난주 기록", lastWeekKnown ? `${lastWeekKnown}명 보관` : "첫 월요일 후 표시"],
+    ["지난주 기록", lastWeekKnown ? `${lastWeekKnown}명 보관` : "지난주 이력 수집 후 표시"],
     ["토벌전 1위", topTobeol ? `${topTobeol.nickname} · ${formatKoreanPower(topTobeol.tobeolValue)}` : "-"]
   ];
 
@@ -1939,8 +1969,8 @@ function renderVirtualPage() {
   if (!state.virtualSelectedKey) initVirtualPicker();
 
   const member = getSelectedVirtualMember();
-  refs.title.textContent = "길드 2D 광장";
-  refs.subtitle.textContent = "가로로 긴 맵에서 이동 · 채팅 · 전투력 기반 스킬 장난하기";
+  refs.title.textContent = "충주시 길드 광장";
+  refs.subtitle.textContent = "길드 캐릭터로 산책 · 실시간 대화 · 가벼운 스킬 놀이";
 
   renderVirtualStatus();
   renderVirtualSelected(member);
@@ -2073,15 +2103,30 @@ function renderVirtualChat() {
 async function joinVirtualLobby(keepPosition = false) {
   const member = getSelectedVirtualMember();
   if (!member) return;
+  const occupied = (state.virtualParticipants || []).find((participant) => participant.userId !== state.virtualUserId
+    && participant.memberKey === virtualMemberKey(member)
+    && isRecentParticipant(participant));
+  if (occupied) {
+    state.virtualStatus = `${member.nickname || "선택한 캐릭터"}님은 이미 광장에 접속 중입니다.`;
+    renderVirtualPage();
+    return;
+  }
   if (!keepPosition) state.virtualPosition = randomVirtualPosition();
   state.virtualJoined = true;
 
   const participant = makeVirtualParticipant(member, state.virtualPosition, { resetHp: true, clearJail: true });
 
-  if (state.virtualClient?.enabled) {
-    await state.virtualClient.upsertParticipant(participant);
-  } else {
-    upsertLocalParticipant(participant);
+  try {
+    if (state.virtualClient?.enabled) {
+      await state.virtualClient.upsertParticipant(participant);
+    } else {
+      upsertLocalParticipant(participant);
+    }
+  } catch (error) {
+    state.virtualJoined = false;
+    state.virtualStatus = `광장 입장 실패: ${error.message}`;
+    renderVirtualPage();
+    return;
   }
 
   startVirtualLoop();
@@ -2157,15 +2202,25 @@ function handleVirtualKeydown(event) {
     useVirtualSkill("heal");
     return;
   }
+  if (event.key.toLowerCase() === "r") {
+    event.preventDefault();
+    useVirtualSkill("shield");
+    return;
+  }
   const map = {
     ArrowUp: "up",
     ArrowDown: "down",
     ArrowLeft: "left",
-    ArrowRight: "right"
+    ArrowRight: "right",
+    w: "up",
+    s: "down",
+    a: "left",
+    d: "right"
   };
-  if (!map[event.key]) return;
+  const direction = map[event.key] || map[event.key.toLowerCase()];
+  if (!direction) return;
   event.preventDefault();
-  nudgeVirtualAvatar(map[event.key]);
+  nudgeVirtualAvatar(direction);
 }
 
 function nudgeVirtualAvatar(direction) {
@@ -2215,21 +2270,33 @@ async function sendVirtualChat() {
     createdAt: new Date().toISOString()
   };
 
-  refs.virtualChatInput.value = "";
-
-  if (state.virtualClient?.enabled) {
-    await state.virtualClient.sendMessage(message);
-    await state.virtualClient.upsertParticipant({
-      ...makeVirtualParticipant(member, state.virtualPosition),
-      lastMessage: text
-    });
-  } else {
-    state.virtualMessages = [...state.virtualMessages, message].slice(-80);
-    localStorage.setItem(LOCAL_CHAT_KEY, JSON.stringify({ messages: state.virtualMessages }));
-    upsertLocalParticipant({ ...makeVirtualParticipant(member, state.virtualPosition), lastMessage: text });
-    renderVirtualChat();
-    renderVirtualWorld();
+  try {
+    if (state.virtualClient?.enabled) {
+      await state.virtualClient.sendMessage(message);
+      await state.virtualClient.upsertParticipant({
+        ...makeVirtualParticipant(member, state.virtualPosition),
+        lastMessage: text
+      });
+    } else {
+      state.virtualMessages = [...state.virtualMessages, message].slice(-80);
+      localStorage.setItem(LOCAL_CHAT_KEY, JSON.stringify({ messages: state.virtualMessages }));
+      upsertLocalParticipant({ ...makeVirtualParticipant(member, state.virtualPosition), lastMessage: text });
+      renderVirtualChat();
+      renderVirtualWorld();
+    }
+    refs.virtualChatInput.value = "";
+  } catch (error) {
+    state.virtualStatus = `채팅 저장 실패: ${error.message}`;
+    renderVirtualStatus();
   }
+}
+
+async function sendVirtualQuickChat(text) {
+  const message = String(text || "").trim().slice(0, 120);
+  if (!message || !refs.virtualChatInput) return;
+  if (!state.virtualJoined) await joinVirtualLobby(false);
+  refs.virtualChatInput.value = message;
+  await sendVirtualChat();
 }
 
 
@@ -4082,9 +4149,11 @@ function applyManualOverrides(data, manual) {
     }
 
     if (hasTobeol || hasPreviousTobeol) {
-      next.tobeolGrowthValue = null;
-      next.tobeolGrowthText = null;
-      next.tobeolGrowthRate = null;
+      const current = nullableNumber(next.currentWeekTobeolValue ?? next.sourceTobeolValue ?? next.tobeolValue);
+      const previous = nullableNumber(next.lastWeekTobeolValue);
+      next.tobeolGrowthValue = current == null || previous == null ? null : current - previous;
+      next.tobeolGrowthText = next.tobeolGrowthValue == null ? null : formatSignedKoreanPower(next.tobeolGrowthValue);
+      next.tobeolGrowthRate = current == null || previous == null ? null : calcGrowthRate(current, previous);
     }
 
     return next;

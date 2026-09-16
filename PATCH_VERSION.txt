@@ -1,4 +1,4 @@
-chungju-guild-dashboard v2.4.0
+chungju-guild-dashboard v2.5.1
 
 - 현재 전투력과 토벌 점수로 길드원 효율을 비교하는 효율 탭 추가
 - 효율 등급, 기대점수, 직업별 기준 멤버, 점검 우선순 표시

@@ -3,7 +3,7 @@ chcp 65001 >nul
 setlocal
 cd /d "%~dp0"
 
-echo Chungju Guild Dashboard v2.4.0 update
+echo Chungju Guild Dashboard v2.5.1 update
 echo ========================================
 
 if not exist ".git" (
@@ -13,10 +13,13 @@ if not exist ".git" (
   exit /b 1
 )
 
+git remote set-url origin https://seoungbin0125@github.com/seoungbin0125/chungju-guild-dashboard.git
+git config --local credential.username seoungbin0125
+
 git add .
 git diff --cached --quiet
 if errorlevel 1 (
-  git commit -m "feat: add raid efficiency and manual guild war scores"
+  git commit -m "fix: align raid week with Monday through Sunday"
   if errorlevel 1 goto :failed
 ) else (
   echo No new local changes to commit.
@@ -38,6 +41,6 @@ exit /b 0
 :failed
 echo.
 echo RESULT: GITHUB_UPDATE_FAILED
-echo Copy the error shown above and send it here.
+echo If the message contains 403, run FIX_GITHUB_LOGIN.bat and sign in as seoungbin0125.
 pause
 exit /b 1

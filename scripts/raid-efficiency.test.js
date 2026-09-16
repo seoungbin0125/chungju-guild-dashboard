@@ -1,27 +1,36 @@
 import test from "node:test";
 import assert from "node:assert/strict";
-import { calculateRaidEfficiency, classifyRaidEfficiency } from "../src/raid-efficiency.js";
+import { calculateRaidEfficiency, calculateServerRankEfficiency, classifyRaidEfficiency } from "../src/raid-efficiency.js";
 import { formatGuildWarScore, mergeGuildWarManualData, normalizeGuildWarScoreInput } from "../src/guild-war-manual.js";
 
 test("효율 등급 경계값을 정확히 분류한다", () => {
-  assert.equal(classifyRaidEfficiency(125).label, "매우 높음");
-  assert.equal(classifyRaidEfficiency(110).label, "높음");
-  assert.equal(classifyRaidEfficiency(90).label, "적정");
-  assert.equal(classifyRaidEfficiency(75).label, "낮음");
-  assert.equal(classifyRaidEfficiency(74.9).label, "매우 낮음");
+  assert.equal(classifyRaidEfficiency(50).label, "매우 높음");
+  assert.equal(classifyRaidEfficiency(25).label, "높음");
+  assert.equal(classifyRaidEfficiency(-10).label, "적정");
+  assert.equal(classifyRaidEfficiency(-30).label, "낮음");
+  assert.equal(classifyRaidEfficiency(-30.1).label, "매우 낮음");
 });
 
-test("전투력과 토벌 점수로 모든 참여자의 기대점수와 효율을 계산한다", () => {
+test("서버 투력 순위 대비 서버 토벌 순위 향상률을 계산한다", () => {
+  assert.equal(calculateServerRankEfficiency(400, 100), 75);
+  assert.equal(calculateServerRankEfficiency(100, 100), 0);
+  assert.equal(calculateServerRankEfficiency(100, 125), -25);
+  assert.equal(calculateServerRankEfficiency(null, 10), null);
+});
+
+test("직업과 실제 점수에 관계없이 서버 순위만으로 효율을 계산한다", () => {
   const members = [
-    { nickname: "A", job: "캡틴", powerValue: 100e12, tobeolValue: 500e8 },
-    { nickname: "B", job: "캡틴", powerValue: 200e12, tobeolValue: 900e8 },
-    { nickname: "C", job: "비숍", powerValue: 400e12, tobeolValue: 1200e8 },
-    { nickname: "D", job: "비숍", powerValue: 800e12, tobeolValue: 2100e8 }
+    { nickname: "A", job: "캡틴", powerValue: 100, tobeolValue: 500, rankScope: "server", serverPowerRank: 400, serverTobeolRank: 100 },
+    { nickname: "B", job: "비숍", powerValue: 999999, tobeolValue: 1, rankScope: "server", serverPowerRank: 100, serverTobeolRank: 125 },
+    { nickname: "C", job: "비숍", powerValue: 500, tobeolValue: 500, rankScope: "server", serverPowerRank: 200, serverTobeolRank: 200 },
+    { nickname: "D", job: "캡틴", powerValue: 1, tobeolValue: 999999, rankScope: "server", serverPowerRank: 800, serverTobeolRank: null }
   ];
   const result = calculateRaidEfficiency(members);
-  assert.equal(result.summary.participantCount, 4);
-  assert.equal(result.entries.every((item) => Number.isFinite(item.expectedTobeolValue)), true);
-  assert.equal(result.entries.every((item) => Number.isFinite(item.efficiencyIndex)), true);
+  assert.equal(result.summary.participantCount, 3);
+  assert.equal(result.entries.find((item) => item.nickname === "A").efficiencyIndex, 75);
+  assert.equal(result.entries.find((item) => item.nickname === "B").efficiencyIndex, -25);
+  assert.equal(result.entries.find((item) => item.nickname === "D").efficiencyGrade.label, "미집계");
+  assert.equal(result.model.jobAdjustment, false);
   assert.equal(Object.values(result.summary.counts).reduce((sum, count) => sum + count, 0), 4);
 });
 

@@ -8987,7 +8987,7 @@ footer.hidden-footer { display: none !important; }
 
 .weekly-raid-head {
   display: grid;
-  grid-template-columns: minmax(230px, 1.25fr) minmax(150px, .8fr) minmax(170px, .9fr);
+  grid-template-columns: minmax(200px, 1.2fr) minmax(120px, .72fr) minmax(155px, .85fr) minmax(140px, .78fr);
   gap: 12px;
   padding: 0 13px 5px 52px;
   color: var(--muted);
@@ -8997,7 +8997,7 @@ footer.hidden-footer { display: none !important; }
 
 .weekly-raid-row {
   display: grid;
-  grid-template-columns: 28px minmax(180px, 1.25fr) minmax(150px, .8fr) minmax(170px, .9fr);
+  grid-template-columns: 28px minmax(160px, 1.2fr) minmax(120px, .72fr) minmax(155px, .85fr) minmax(140px, .78fr);
   align-items: center;
   gap: 12px;
   padding: 10px 13px;
@@ -9013,6 +9013,11 @@ footer.hidden-footer { display: none !important; }
 .weekly-raid-row b { color: var(--primary-dark); font-size: .78rem; white-space: nowrap; }
 .weekly-raid-row em { color: #4b6c72; font-size: .68rem; font-style: normal; font-weight: 800; }
 .weekly-raid-row em.is-empty { color: #91a3a6; font-weight: 700; }
+.weekly-difference { font-size: .68rem; font-weight: 900; white-space: nowrap; }
+.weekly-difference.is-up { color: #087565; }
+.weekly-difference.is-down { color: #c4554d; }
+.weekly-difference.is-zero { color: #55747a; }
+.weekly-difference.is-empty { color: #91a3a6; font-weight: 700; }
 
 .live-tobeol-hero,
 .contents-hero { border-radius: 26px !important; }
@@ -9089,7 +9094,7 @@ footer.hidden-footer { display: none !important; }
   .weekly-raid-head { display: none; }
   .weekly-raid-row {
     grid-template-columns: 25px minmax(0, 1fr) auto;
-    grid-template-areas: "rank member current" ". previous previous";
+    grid-template-areas: "rank member current" ". previous previous" ". difference difference";
     gap: 4px 8px;
     padding: 9px;
   }
@@ -9097,6 +9102,7 @@ footer.hidden-footer { display: none !important; }
   .weekly-raid-row div { grid-area: member; }
   .weekly-raid-row b { grid-area: current; font-size: .7rem; }
   .weekly-raid-row em { grid-area: previous; text-align: right; font-size: .6rem; }
+  .weekly-raid-row .weekly-difference { grid-area: difference; text-align: right; font-size: .6rem; }
   .featured-panel { padding: 10px !important; }
   .featured-member-item.power-row {
     grid-template-columns: 24px 72px minmax(0, 1fr) minmax(72px, .58fr) 42px !important;
@@ -9651,4 +9657,129 @@ footer.hidden-footer { display: none !important; }
   .efficiency-job-grid { grid-template-columns: 1fr; }
   .guild-war-input-toolbar { grid-template-columns: 1fr; }
   .guild-war-input-toolbar .primary-btn { grid-column: auto; }
+}
+
+/* v2.5.x server-rank efficiency + Chungju plaza */
+.main-nav.desktop-nav [data-page="virtual"] { display: inline-flex !important; }
+.bottom-mobile-nav [data-page="virtual"] { display: grid !important; }
+#page-virtual.content-page { display: none !important; }
+#page-virtual.content-page.active { display: block !important; }
+
+.efficiency-table-head,
+.efficiency-row {
+  grid-template-columns: 58px minmax(150px, 1.2fr) minmax(120px, .82fr) minmax(120px, .82fr) minmax(105px, .7fr) 88px 92px;
+  min-width: 860px;
+}
+
+.efficiency-metric.power strong { color: #315f82; }
+.efficiency-metric.actual strong { color: #087565; }
+.efficiency-metric.expected strong { color: #55747a; }
+.efficiency-metric.rank-up strong,
+.efficiency-index.rank-up { color: #087565; }
+.efficiency-metric.rank-down strong,
+.efficiency-index.rank-down { color: #c4554d; }
+.efficiency-metric.rank-even strong,
+.efficiency-index.rank-even { color: #668087; }
+
+.stage-lake {
+  position: absolute;
+  left: 3.5%;
+  top: 35%;
+  z-index: 0;
+  width: 30%;
+  height: 145px;
+  overflow: hidden;
+  border: 5px solid rgba(235, 255, 252, .72);
+  border-radius: 48% 54% 46% 58%;
+  background:
+    repeating-linear-gradient(170deg, rgba(255,255,255,.28) 0 3px, transparent 3px 18px),
+    linear-gradient(160deg, #78d8dc, #2fa9bd 72%, #187f9a);
+  box-shadow: 0 12px 28px rgba(10, 102, 125, .2), inset 0 0 30px rgba(255,255,255,.25);
+  transform: rotate(-3deg);
+  pointer-events: none;
+}
+
+.stage-lake::after {
+  position: absolute;
+  inset: 14% 8%;
+  border: 2px dashed rgba(235,255,252,.42);
+  border-radius: 50%;
+  content: "";
+}
+
+.stage-bridge {
+  position: absolute;
+  left: 9%;
+  top: 46%;
+  z-index: 1;
+  display: grid;
+  width: 190px;
+  height: 24px;
+  place-items: center;
+  border-radius: 999px;
+  color: #f8fffd;
+  background: linear-gradient(180deg, #d99862, #8d5837);
+  box-shadow: 0 8px 0 rgba(86, 53, 32, .3), 0 12px 20px rgba(44, 87, 83, .18);
+  transform: rotate(-5deg);
+  pointer-events: none;
+}
+
+.stage-bridge span {
+  padding: 3px 9px;
+  border-radius: 999px;
+  background: rgba(5, 83, 91, .82);
+  font-size: .58rem;
+  font-weight: 950;
+  letter-spacing: .12em;
+}
+
+.virtual-quick-chat {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 6px;
+  padding: 0 18px 10px;
+}
+
+.virtual-quick-chat button {
+  min-height: 34px;
+  padding: 5px 7px;
+  border: 1px solid #c9dedb;
+  border-radius: 11px;
+  color: #42666b;
+  background: #f4faf9;
+  font-size: .65rem;
+  font-weight: 900;
+}
+
+.virtual-quick-chat button:hover {
+  color: #fff;
+  border-color: #159786;
+  background: #159786;
+}
+
+@media (max-width: 900px) {
+  .bottom-mobile-nav { grid-template-columns: repeat(6, minmax(0, 1fr)) !important; }
+  .bottom-tab { min-height: 55px !important; padding: 3px 1px !important; }
+  .bottom-tab b { font-size: .61rem !important; }
+  .bottom-tab span { font-size: .92rem !important; }
+}
+
+@media (max-width: 700px) {
+  .efficiency-row {
+    grid-template-columns: 30px minmax(0, 1fr) minmax(0, .82fr) auto;
+    grid-template-areas:
+      "rank member member grade"
+      ". power actual index"
+      ". expected expected index";
+    min-width: 0;
+  }
+
+  .virtual-quick-chat { padding: 0 12px 9px; }
+  .virtual-quick-chat button { font-size: .59rem; }
+}
+
+@media (max-width: 390px) {
+  .bottom-mobile-nav { left: 5px !important; right: 5px !important; gap: 3px !important; padding: 5px !important; }
+  .bottom-tab b { font-size: .54rem !important; }
+  .bottom-tab span { font-size: .88rem !important; }
 }
