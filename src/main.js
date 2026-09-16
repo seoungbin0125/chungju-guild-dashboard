@@ -3,7 +3,7 @@ import { createGuideBoardClient, createJellyGameClient, createManualOverrideClie
 import { calculateRaidEfficiency } from "./raid-efficiency.js";
 import { mergeGuildWarManualData, normalizeGuildWarScoreInput } from "./guild-war-manual.js";
 
-const APP_VERSION = "v2.5.1";
+const APP_VERSION = "v2.5.2";
 const LIVE_TOBEOL_API_ORIGIN = "https://chungju-guild-dashboard.pages.dev";
 const EDIT_PASSWORD = "5645";
 const LOCAL_MANUAL_KEY = "chungju-guild-dashboard.manual.v1";
@@ -569,6 +569,7 @@ function rebuildData() {
     state.serverManual
   ], cloned.capturedDate);
 
+  cloned.members = normalizeRaidCarryoverMembers(cloned.members || []);
   applyManualOverrides(cloned, effectiveManual);
   cloned.members = normalizeMemberServerRanks(cloned.members || []);
   cloned.summary = buildSummary(cloned.members || []);
@@ -1292,7 +1293,6 @@ function renderLiveTobeolResults() {
     return;
   }
 
-  const summary = data.summary || {};
   const period = data.raidPeriod || {};
   const participationLabel = "이번 주 참여";
   const missedLabel = "이번 주 미참여";
@@ -1305,8 +1305,24 @@ function renderLiveTobeolResults() {
   const allMembers = sortRankComparisonMembers(
     normalizeMemberServerRanks(sourceMembers.map((member) => {
       const stored = storedRanks.get(member.nickname) || {};
+      const rawScore = Number(member.tobeolValue || 0);
+      const storedRawScore = Number(stored.sourceTobeolValue ?? stored.tobeolValue ?? 0);
+      const matchesPreviousWeek = rawScore > 0
+        && stored.lastWeekTobeolValue != null
+        && rawScore === Number(stored.lastWeekTobeolValue);
+      const hasExplicitCarryoverState = typeof stored.tobeolCarryoverDetected === "boolean";
+      const isStoredCarryover = hasExplicitCarryoverState
+        ? stored.tobeolCarryoverDetected && rawScore === storedRawScore
+        : matchesPreviousWeek;
+      const effectiveScore = isStoredCarryover
+        ? Number(stored.currentWeekTobeolValue || 0)
+        : rawScore;
       return {
         ...member,
+        tobeolValue: effectiveScore,
+        tobeolText: formatKoreanPower(effectiveScore),
+        hit: effectiveScore > 0,
+        tobeolCarryoverDetected: isStoredCarryover,
         rankScope: stored.rankScope,
         serverName: stored.serverName,
         serverPowerRank: stored.serverPowerRank,
@@ -1315,10 +1331,19 @@ function renderLiveTobeolResults() {
         powerRank: stored.powerRank,
         tobeolRank: stored.tobeolRank,
         raidRankAdvantage: stored.raidRankAdvantage,
-        __tobeolStatus: Number(member.tobeolValue || 0) > 0 || member.hit ? "hit" : "missed"
+        __tobeolStatus: effectiveScore > 0 ? "hit" : "missed"
       };
     })),
     state.liveRankSort
+  );
+  const effectiveHitCount = allMembers.filter((member) => member.__tobeolStatus === "hit").length;
+  const effectiveMissedCount = allMembers.length - effectiveHitCount;
+  const effectiveHitRate = allMembers.length
+    ? Number(((effectiveHitCount / allMembers.length) * 100).toFixed(1))
+    : 0;
+  const effectiveTotalTobeolValue = allMembers.reduce(
+    (total, member) => total + Number(member.tobeolValue || 0),
+    0
   );
   const raidAheadCount = allMembers.filter((member) => Number(member.raidRankAdvantage) > 0).length;
   const raidEqualCount = allMembers.filter((member) => Number(member.raidRankAdvantage) === 0 && member.tobeolRank != null).length;
@@ -1327,17 +1352,17 @@ function renderLiveTobeolResults() {
   refs.liveTobeolSummary.innerHTML = `
     <article class="live-summary-card hit">
       <span>${participationLabel}</span>
-      <strong>${Number(summary.hitCount || 0)}명</strong>
-      <small>참여율 ${escapeHtml(String(summary.hitRate ?? 0))}%</small>
+      <strong>${effectiveHitCount}명</strong>
+      <small>참여율 ${escapeHtml(String(effectiveHitRate))}%</small>
     </article>
     <article class="live-summary-card missed">
       <span>${missedLabel}</span>
-      <strong>${Number(summary.missedCount || 0)}명</strong>
+      <strong>${effectiveMissedCount}명</strong>
       <small>현재 누적 점수 없음</small>
     </article>
     <article class="live-summary-card total">
       <span>${escapeHtml(period.metricLabel || "총 토벌전")}</span>
-      <strong>${escapeHtml(summary.totalTobeolText || "0")}</strong>
+      <strong>${escapeHtml(formatKoreanPower(effectiveTotalTobeolValue))}</strong>
       <small>${escapeHtml(data.sourceDataDate || "-")} 기준 · ${escapeHtml(period.scoreWeekKey || "-")} 주차</small>
     </article>
     <article class="live-summary-card compare">
@@ -1360,7 +1385,11 @@ function renderLiveTobeolMember(member, type) {
   const tobeolRank = member.tobeolRank ?? null;
   const scoreText = isHit ? (member.tobeolText || "0") : "—";
   const delta = rankDifferenceMeta(member);
-  const detailText = isHit ? `${statusText} · 서버 투력 ${powerRank ? `#${powerRank}` : "순위 없음"}` : "점수 없음";
+  const detailText = isHit
+    ? `${statusText} · 서버 투력 ${powerRank ? `#${powerRank}` : "순위 없음"}`
+    : member.tobeolCarryoverDetected
+      ? "지난주 점수 유지 · 이번 주 미참여"
+      : "점수 없음";
 
   return `
     <article class="live-member-row ${isHit ? "is-hit" : "is-missed"}">
@@ -1644,7 +1673,7 @@ function renderWeeklyRaidList() {
       return `
         <article class="weekly-raid-row">
           <span class="weekly-rank">${index + 1}</span>
-          <div><strong>${escapeHtml(member.nickname || "-")}</strong><small>${escapeHtml(member.job || "-")} · Lv.${escapeHtml(member.level || "-")}</small></div>
+          <div><strong>${escapeHtml(member.nickname || "-")}</strong><small>${escapeHtml(member.job || "-")} · Lv.${escapeHtml(member.level || "-")}${member.tobeolCarryoverDetected ? " · 지난주 값 유지 → 이번 주 미참여" : ""}</small></div>
           <b>${escapeHtml(formatKoreanPower(sourceScore))}</b>
           <em class="${lastWeek == null ? "is-empty" : ""}">${escapeHtml(lastWeekLabel)}</em>
           <span class="weekly-difference ${escapeAttr(difference.className)}">${escapeHtml(difference.label)}</span>
@@ -1703,7 +1732,7 @@ function renderRankComparisonRow(member) {
   const delta = rankDifferenceMeta(member);
   const powerRank = member.powerRank == null ? "-" : `#${member.powerRank}`;
   const tobeolRank = member.tobeolRank == null ? "미참여" : `#${member.tobeolRank}`;
-  const tobeolValue = member.sourceTobeolValue ?? member.tobeolValue ?? 0;
+  const tobeolValue = member.currentWeekTobeolValue ?? member.tobeolValue ?? 0;
 
   return `
     <article class="rank-compare-row ${member.tobeolRank == null ? "is-unranked" : ""}">
@@ -3389,13 +3418,45 @@ function getGuildFilteredMembers() {
     .filter((member) => state.guildFilter === "all" || member.guild === state.guildFilter);
 }
 
+function normalizeRaidCarryoverMembers(members) {
+  return (Array.isArray(members) ? members : []).map((member) => {
+    const sourceValue = Number(member.sourceTobeolValue ?? member.tobeolValue ?? 0);
+    const lastWeekValue = nullableNumber(member.lastWeekTobeolValue ?? member.previousTobeolValue);
+    const hasExplicitState = typeof member.tobeolCarryoverDetected === "boolean";
+    const carryoverDetected = hasExplicitState
+      ? member.tobeolCarryoverDetected
+      : sourceValue > 0 && lastWeekValue != null && sourceValue === lastWeekValue;
+    if (!carryoverDetected) return member;
+
+    const growthValue = lastWeekValue == null ? null : -lastWeekValue;
+    return {
+      ...member,
+      currentWeekTobeolValue: 0,
+      currentWeekTobeolText: formatKoreanPower(0),
+      tobeolValue: 0,
+      tobeolRaw: "0",
+      tobeolText: formatKoreanPower(0),
+      tobeolParticipated: false,
+      tobeolCarryoverDetected: true,
+      tobeolCarryoverSourceValue: sourceValue,
+      tobeolGrowthValue: growthValue,
+      tobeolGrowthText: growthValue == null ? null : formatSignedKoreanPower(growthValue),
+      tobeolGrowthRate: lastWeekValue > 0 ? -100 : null,
+      serverTobeolRank: null,
+      serverRaidRankAdvantage: null,
+      tobeolRank: null,
+      raidRankAdvantage: null
+    };
+  });
+}
+
 function normalizeMemberServerRanks(members) {
   return (Array.isArray(members) ? members : []).map((member) => {
     const hasServerScope = member.rankScope === "server"
       || member.serverPowerRank != null
       || member.serverTobeolRank != null;
     const serverPowerRank = normalizePositiveRank(member.serverPowerRank ?? (hasServerScope ? member.powerRank : null));
-    const hasRaidScore = Number(member.sourceTobeolValue ?? member.tobeolValue ?? 0) > 0;
+    const hasRaidScore = Number(member.currentWeekTobeolValue ?? member.tobeolValue ?? 0) > 0;
     const serverTobeolRank = hasRaidScore
       ? normalizePositiveRank(member.serverTobeolRank ?? (hasServerScope ? member.tobeolRank : null))
       : null;
@@ -3452,7 +3513,7 @@ function getTableSpec(tab) {
         col("길드", renderGuild),
         col("닉네임", renderName),
         col("레벨", (member) => `Lv.${member.level}`),
-        col("이번 주 점수", (member) => formatKoreanPower(member.sourceTobeolValue ?? member.tobeolValue)),
+        col("이번 주 점수", (member) => formatKoreanPower(member.currentWeekTobeolValue ?? member.tobeolValue)),
         col("지난주 기록", (member) => member.lastWeekTobeolText || "-"),
         col("상태", (member) => member.lastWeekTobeolValue == null ? `<span class="muted">기록 없음</span>` : `<span class="good">${member.lastWeekTobeolIsFinal ? "확정" : "최근 기록"}</span>`)
       ]
@@ -3494,6 +3555,7 @@ function renderName(member) {
 }
 
 function renderMemberStatusBadge(member) {
+  if (member?.tobeolCarryoverDetected) return `<span class="status-badge carryover">이번 주 미참여</span>`;
   if (member?.memberStatus === "new") return `<span class="status-badge new">신규</span>`;
   if (member?.memberStatus === "departed") return `<span class="status-badge departed">탈퇴</span>`;
   return "";
@@ -4139,6 +4201,9 @@ function applyManualOverrides(data, manual) {
         next.currentWeekTobeolValue = next.tobeolValue;
         next.currentWeekTobeolText = next.tobeolText;
       }
+      next.tobeolCarryoverDetected = false;
+      next.tobeolCarryoverSourceValue = null;
+      next.tobeolParticipated = Number(next.tobeolValue || 0) > 0;
     }
 
     if (hasPreviousTobeol) {
@@ -4222,10 +4287,12 @@ function buildSummary(members) {
     guildCount: new Set(members.map((member) => member.guild).filter(Boolean)).size,
     memberCount: members.length,
     totalPowerValue: members.reduce((sum, member) => sum + Number(member.powerValue || 0), 0),
-    totalTobeolValue: members.reduce((sum, member) => sum + Number(member.sourceTobeolValue ?? member.tobeolValue ?? 0), 0),
+    totalTobeolValue: members.reduce((sum, member) => sum + Number(member.currentWeekTobeolValue ?? member.tobeolValue ?? 0), 0),
+    totalSourceTobeolValue: members.reduce((sum, member) => sum + Number(member.sourceTobeolValue ?? member.tobeolValue ?? 0), 0),
     totalCurrentWeekTobeolValue: members.reduce((sum, member) => sum + Number(member.currentWeekTobeolValue || 0), 0),
     totalLastWeekTobeolValue: members.reduce((sum, member) => sum + Number(member.lastWeekTobeolValue || 0), 0),
-    lastWeekKnownCount: members.filter((member) => member.lastWeekTobeolValue != null).length
+    lastWeekKnownCount: members.filter((member) => member.lastWeekTobeolValue != null).length,
+    carryoverDetectedCount: members.filter((member) => member.tobeolCarryoverDetected).length
   };
 }
 

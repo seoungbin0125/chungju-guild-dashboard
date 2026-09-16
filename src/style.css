@@ -3129,6 +3129,12 @@ footer {
   background: var(--bad-bg);
 }
 
+.status-badge.carryover {
+  color: #9a3412;
+  background: #ffedd5;
+  border: 1px solid #fed7aa;
+}
+
 .hotdeal-hero,
 .hotdeal-summary-card,
 .hotdeal-card,

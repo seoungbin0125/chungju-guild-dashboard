@@ -44,4 +44,4 @@ rsync -av \
   "$SOURCE_DIR/" "$TARGET_DIR/"
 
 echo "적용 완료: $TARGET_DIR"
-echo "버전: v2.5.1"
+echo "버전: v2.5.2"

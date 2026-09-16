@@ -168,6 +168,51 @@ export function calculateRaidScoreDifference(currentValue, previousValue) {
   return { value, rate };
 }
 
+/**
+ * MGF가 주차 변경 뒤에도 직전 주 점수를 그대로 노출하는 경우를 분리한다.
+ * 새 주의 첫 관측값이 직전 주 원본값과 정확히 같으면 원본은 보존하되
+ * 이번 주는 미참여(0점)로 처리한다. 이후 값이 달라지는 순간 새 주
+ * 참여로 전환하며, 이미 참여로 판정된 주에는 우연히 값이 같아져도
+ * 다시 미참여로 되돌리지 않는다.
+ */
+export function resolveRaidWeekScore(sourceValue, previousMember, currentWeekMember = null) {
+  const source = nullableScore(sourceValue) ?? 0;
+  const previousSource = nullableScore(
+    previousMember?.sourceTobeolValue
+      ?? previousMember?.tobeolValue
+      ?? previousMember?.sourceTobeolRaw
+  );
+  const previousEffective = nullableScore(
+    previousMember?.currentWeekTobeolValue
+      ?? previousMember?.tobeolValue
+      ?? previousSource
+  );
+  const observedSource = nullableScore(
+    currentWeekMember?.sourceTobeolValue
+      ?? currentWeekMember?.tobeolValue
+      ?? currentWeekMember?.sourceTobeolRaw
+  );
+  const hasCurrentWeekObservation = currentWeekMember != null;
+  const hasExplicitCarryoverState = typeof currentWeekMember?.tobeolCarryoverDetected === "boolean";
+  const wasCarryover = hasExplicitCarryoverState
+    ? currentWeekMember.tobeolCarryoverDetected
+    : source > 0 && previousSource != null && observedSource === previousSource;
+  const carryoverDetected = source > 0
+    && previousSource != null
+    && (hasCurrentWeekObservation
+      ? wasCarryover && source === observedSource
+      : source === previousSource);
+
+  return {
+    sourceValue: source,
+    previousSourceValue: previousSource,
+    lastWeekValue: previousEffective,
+    currentWeekValue: carryoverDetected ? 0 : source,
+    participated: !carryoverDetected && source > 0,
+    carryoverDetected
+  };
+}
+
 export function findPowerComparisonSnapshot(history, guild, targetDate, maxDistanceDays = 2) {
   const target = normalizeDate(targetDate);
   if (!target) return null;
@@ -417,6 +462,12 @@ function exactInteger(value) {
   if (!/^\d+$/.test(source)) return null;
   const number = Number(source);
   return Number.isFinite(number) ? number : null;
+}
+
+function nullableScore(value) {
+  if (value == null || value === "") return null;
+  const score = Number(String(value).replace(/,/g, "").trim());
+  return Number.isFinite(score) && score >= 0 ? score : null;
 }
 
 function integerFromText(value) {

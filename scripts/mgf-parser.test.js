@@ -8,7 +8,8 @@ import {
   getRaidPeriod,
   parseGuildContentHtml,
   parseGuildInfoHtml,
-  parseServerRankingHtml
+  parseServerRankingHtml,
+  resolveRaidWeekScore
 } from "./mgf-parser.js";
 
 test("길드 내 전투력 순위와 토벌 순위를 비교하고 0점은 미참여로 둔다", () => {
@@ -110,6 +111,80 @@ test("이번 주 누적 점수와 지난주 점수의 차이와 비율을 계산
   assert.deepEqual(calculateRaidScoreDifference(80, 100), { value: -20, rate: -20 });
   assert.deepEqual(calculateRaidScoreDifference(0, 0), { value: 0, rate: null });
   assert.deepEqual(calculateRaidScoreDifference(100, null), { value: null, rate: null });
+});
+
+test("일요일과 월요일 MGF 점수가 같으면 지난주 점수로 보존하고 이번 주는 미참여로 둔다", () => {
+  const lastSundayScore = 261_623_110_000; // 2616억 2311만
+  const result = resolveRaidWeekScore(lastSundayScore, {
+    sourceTobeolValue: lastSundayScore,
+    currentWeekTobeolValue: lastSundayScore,
+    tobeolValue: lastSundayScore
+  });
+
+  assert.equal(result.sourceValue, lastSundayScore);
+  assert.equal(result.lastWeekValue, lastSundayScore);
+  assert.equal(result.currentWeekValue, 0);
+  assert.equal(result.participated, false);
+  assert.equal(result.carryoverDetected, true);
+});
+
+test("MGF 점수가 지난주와 달라지면 이번 주 새 참여 점수로 전환한다", () => {
+  const result = resolveRaidWeekScore(12_345_000_000, {
+    sourceTobeolValue: 261_623_110_000,
+    currentWeekTobeolValue: 261_623_110_000
+  });
+
+  assert.equal(result.lastWeekValue, 261_623_110_000);
+  assert.equal(result.currentWeekValue, 12_345_000_000);
+  assert.equal(result.participated, true);
+  assert.equal(result.carryoverDetected, false);
+});
+
+test("MGF가 여러 주 같은 과거 점수를 유지해도 새 주 참여로 되살리지 않는다", () => {
+  const staleScore = 261_623_110_000;
+  const result = resolveRaidWeekScore(staleScore, {
+    sourceTobeolValue: staleScore,
+    currentWeekTobeolValue: 0,
+    tobeolValue: 0
+  });
+
+  assert.equal(result.lastWeekValue, 0);
+  assert.equal(result.currentWeekValue, 0);
+  assert.equal(result.participated, false);
+  assert.equal(result.carryoverDetected, true);
+});
+
+test("이번 주에 이미 참여로 판정된 뒤에는 우연히 지난주와 같은 값이어도 미참여로 되돌리지 않는다", () => {
+  const repeatedScore = 261_623_110_000;
+  const result = resolveRaidWeekScore(
+    repeatedScore,
+    { sourceTobeolValue: repeatedScore, currentWeekTobeolValue: repeatedScore },
+    { sourceTobeolValue: 100_000_000, currentWeekTobeolValue: 100_000_000, tobeolCarryoverDetected: false }
+  );
+
+  assert.equal(result.currentWeekValue, repeatedScore);
+  assert.equal(result.participated, true);
+  assert.equal(result.carryoverDetected, false);
+});
+
+test("구버전 이번 주 기록도 지난주와 같은 원본값이면 이월 점수로 마이그레이션한다", () => {
+  const staleScore = 261_623_110_000;
+  const result = resolveRaidWeekScore(
+    staleScore,
+    { sourceTobeolValue: staleScore, currentWeekTobeolValue: staleScore },
+    { sourceTobeolValue: staleScore, currentWeekTobeolValue: staleScore }
+  );
+
+  assert.equal(result.currentWeekValue, 0);
+  assert.equal(result.participated, false);
+  assert.equal(result.carryoverDetected, true);
+});
+
+test("지난주 스냅샷이 없으면 MGF 점수를 임의로 미참여 처리하지 않는다", () => {
+  const result = resolveRaidWeekScore(261_623_110_000, null);
+  assert.equal(result.currentWeekValue, 261_623_110_000);
+  assert.equal(result.participated, true);
+  assert.equal(result.carryoverDetected, false);
 });
 
 test("전투력 7일 비교는 누락일이 있어도 목표일 근처 2일 이내를 사용한다", () => {

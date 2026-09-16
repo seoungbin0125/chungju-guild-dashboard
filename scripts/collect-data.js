@@ -10,7 +10,8 @@ import {
   getRaidPeriod,
   kstDateString,
   parseGuildInfoHtml,
-  parseKoreanPowerValue
+  parseKoreanPowerValue,
+  resolveRaidWeekScore
 } from "./mgf-parser.js";
 import { fetchServerMemberRanks } from "./mgf-server-ranks.js";
 
@@ -109,10 +110,13 @@ async function run() {
     const finalRaidSnapshot = findRaidSnapshot(history, guild, previousWeekKey, { finalOnly: true });
     const raidSnapshot = finalRaidSnapshot || findRaidSnapshot(history, guild, previousWeekKey, { finalOnly: false });
     const raidMap = memberMap(raidSnapshot);
+    const currentRaidSnapshot = findRaidSnapshot(history, guild, raidPeriod.currentWeekKey, { finalOnly: false });
+    const currentRaidMap = memberMap(currentRaidSnapshot);
     raidHistoryByGuild[guild] = {
       currentWeekKey: raidPeriod.currentWeekKey,
       previousWeekKey,
       snapshotDate: raidSnapshot?.sourceDataDate || raidSnapshot?.date || null,
+      currentWeekObservationDate: currentRaidSnapshot?.sourceDataDate || currentRaidSnapshot?.date || null,
       isFinal: Boolean(finalRaidSnapshot),
       status: finalRaidSnapshot ? "sunday_final" : raidSnapshot ? "latest_available" : "not_collected"
     };
@@ -134,15 +138,17 @@ async function run() {
     for (const member of members) {
       const previousPower = powerMap.get(member.nickname) || null;
       const historyRaid = raidMap.get(member.nickname) || null;
+      const currentWeekRaid = currentRaidMap.get(member.nickname) || null;
       const sourceTobeolValue = Number(member.tobeolValue || 0);
-      const currentWeekTobeolValue = sourceTobeolValue;
-      const lastWeekTobeolValue = nullableNumber(historyRaid?.sourceTobeolValue ?? historyRaid?.tobeolValue);
+      const raidScore = resolveRaidWeekScore(sourceTobeolValue, historyRaid, currentWeekRaid);
+      const currentWeekTobeolValue = raidScore.currentWeekValue;
+      const lastWeekTobeolValue = raidScore.lastWeekValue;
       const tobeolDifference = calculateRaidScoreDifference(currentWeekTobeolValue, lastWeekTobeolValue);
       const powerGrowthValue = previousPower
         ? Number(member.powerValue || 0) - Number(previousPower.powerValue || 0)
         : null;
       const serverPowerRank = positiveInteger(serverRanks.powerByNickname?.[member.nickname]);
-      const serverTobeolRank = sourceTobeolValue > 0
+      const serverTobeolRank = currentWeekTobeolValue > 0
         ? positiveInteger(serverRanks.raidByNickname?.[member.nickname])
         : null;
       const serverRaidRankAdvantage = serverPowerRank != null && serverTobeolRank != null
@@ -169,12 +175,16 @@ async function run() {
         sourceTobeolValue,
         sourceTobeolText: member.tobeolText,
         currentWeekTobeolValue,
-        currentWeekTobeolText: currentWeekTobeolValue == null ? null : formatKoreanPower(currentWeekTobeolValue),
+        currentWeekTobeolText: formatKoreanPower(currentWeekTobeolValue),
+        tobeolParticipated: raidScore.participated,
+        tobeolCarryoverDetected: raidScore.carryoverDetected,
+        tobeolCarryoverSourceValue: raidScore.carryoverDetected ? raidScore.previousSourceValue : null,
         lastWeekTobeolValue,
         lastWeekTobeolText: lastWeekTobeolValue == null ? null : formatKoreanPower(lastWeekTobeolValue),
         lastWeekTobeolIsFinal: Boolean(finalRaidSnapshot),
-        tobeolValue: sourceTobeolValue,
-        tobeolText: member.tobeolText,
+        tobeolValue: currentWeekTobeolValue,
+        tobeolRaw: String(Math.max(0, Math.trunc(currentWeekTobeolValue))),
+        tobeolText: formatKoreanPower(currentWeekTobeolValue),
         previousTobeolValue: lastWeekTobeolValue,
         previousTobeolText: lastWeekTobeolValue == null ? null : formatKoreanPower(lastWeekTobeolValue),
         tobeolGrowthValue: tobeolDifference.value,
@@ -199,8 +209,8 @@ async function run() {
 
   const latest = {
     ok: true,
-    version: 8,
-    appVersion: "v2.5.1",
+    version: 9,
+    appVersion: "v2.5.2",
     guilds: guildNames,
     guild: guildNames.join(" · "),
     capturedDate,
@@ -284,11 +294,13 @@ async function run() {
         powerRank: member.powerRank,
         sourceTobeolValue: member.sourceTobeolValue,
         sourceTobeolRaw: member.sourceTobeolRaw,
+        currentWeekTobeolValue: member.currentWeekTobeolValue,
+        tobeolCarryoverDetected: member.tobeolCarryoverDetected,
         serverTobeolRank: member.serverTobeolRank,
         tobeolRank: member.tobeolRank,
         serverRaidRankAdvantage: member.serverRaidRankAdvantage,
         raidRankAdvantage: member.raidRankAdvantage,
-        tobeolValue: member.sourceTobeolValue
+        tobeolValue: member.currentWeekTobeolValue
       }))
   }));
 
@@ -311,10 +323,12 @@ function buildSummary(members) {
     guildCount: new Set(members.map((member) => member.guild).filter(Boolean)).size,
     memberCount: members.length,
     totalPowerValue: total("powerValue"),
-    totalTobeolValue: total("sourceTobeolValue"),
+    totalTobeolValue: total("currentWeekTobeolValue"),
+    totalSourceTobeolValue: total("sourceTobeolValue"),
     totalCurrentWeekTobeolValue: total("currentWeekTobeolValue"),
     totalLastWeekTobeolValue: total("lastWeekTobeolValue"),
-    lastWeekKnownCount: members.filter((member) => member.lastWeekTobeolValue != null).length
+    lastWeekKnownCount: members.filter((member) => member.lastWeekTobeolValue != null).length,
+    carryoverDetectedCount: members.filter((member) => member.tobeolCarryoverDetected).length
   };
 }
 
@@ -365,6 +379,9 @@ function applyManualOverrides(members, manual, capturedDate) {
       member.tobeolText = formatKoreanPower(member.tobeolValue);
       if (member.currentWeekTobeolValue != null) member.currentWeekTobeolValue = member.tobeolValue;
       if (member.currentWeekTobeolValue != null) member.currentWeekTobeolText = member.tobeolText;
+      member.tobeolCarryoverDetected = false;
+      member.tobeolCarryoverSourceValue = null;
+      member.tobeolParticipated = member.tobeolValue > 0;
       changed = true;
     }
     if (hasManualValue(item, "previousTobeol")) {

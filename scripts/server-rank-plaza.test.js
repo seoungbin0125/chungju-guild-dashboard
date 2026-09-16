@@ -41,3 +41,10 @@ test("토벌 비교 화면과 자동 수집은 월요일~일요일 주차를 보
   assert.match(collectorWorkflow, /20,40,55 14 \* \* 0/);
   assert.match(collectorWorkflow, /scripts\/mgf-parser\.js/);
 });
+
+test("지난주 MGF 점수가 새 주에 그대로 남으면 이번 주 미참여로 표시한다", () => {
+  assert.match(main, /normalizeRaidCarryoverMembers/);
+  assert.match(main, /지난주 점수 유지 · 이번 주 미참여/);
+  assert.match(main, /effectiveTotalTobeolValue/);
+  assert.match(css, /\.status-badge\.carryover/);
+});

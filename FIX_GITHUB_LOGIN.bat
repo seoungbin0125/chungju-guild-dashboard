@@ -6,7 +6,7 @@ cd /d "%~dp0"
 echo Chungju Dashboard - GitHub login
 echo =================================
 
-if not exist ".git" (
+if not exist "%CD%\.git\HEAD" (
   echo Run this file inside C:\work\meki\chungju-guild-dashboard.
   pause
   exit /b 1
@@ -19,10 +19,20 @@ git credential-manager github login --username seoungbin0125 --force
 if errorlevel 1 goto :manual
 
 echo.
-echo Login complete. Pushing the saved commits...
+echo Login complete. Syncing GitHub before pushing...
+git pull --rebase --autostash origin main
+if errorlevel 1 goto :failed
+
+git push origin main
+if not errorlevel 1 goto :success
+
+echo Remote changed while pushing. Syncing once and retrying...
+git pull --rebase --autostash origin main
+if errorlevel 1 goto :failed
 git push origin main
 if errorlevel 1 goto :failed
 
+:success
 echo.
 echo RESULT: GITHUB_UPDATE_OK
 echo Cloudflare Pages will deploy automatically.
@@ -41,5 +51,6 @@ exit /b 1
 echo.
 echo RESULT: GITHUB_UPDATE_FAILED
 echo Make sure the browser was signed in as seoungbin0125, not tjsy-developer.
+echo Run git status. Resolve any rebase conflict before pushing again.
 pause
 exit /b 1
