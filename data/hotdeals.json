@@ -1,5 +1,5 @@
 {
-  "ok": true,
+  "ok": false,
   "version": 1,
   "source": "arca.live hotdeal",
   "sourceUrl": "https://arca.live/b/hotdeal?target=all&keyword=%EA%B8%B0%ED%94%84%ED%8A%B8%EC%B9%B4%EB%93%9C",
@@ -79,5 +79,8 @@
         "상품권/쿠폰"
       ]
     }
-  ]
+  ],
+  "error": "핫딜 페이지 fetch 실패 403: https://arca.live/b/hotdeal?target=all&keyword=%EA%B8%B0%ED%94%84%ED%8A%B8%EC%B9%B4%EB%93%9C",
+  "lastFailedAt": "2026-11-14 07:36",
+  "notice": "arca.live가 GitHub Actions/서버 요청을 403으로 차단했습니다. 기존 데이터 또는 빈 목록을 유지하고 전체 대시보드 수집은 계속 진행합니다."
 }
