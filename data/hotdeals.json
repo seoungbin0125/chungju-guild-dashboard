@@ -1,15 +1,83 @@
 {
-  "ok": false,
+  "ok": true,
   "version": 1,
   "source": "arca.live hotdeal",
   "sourceUrl": "https://arca.live/b/hotdeal?target=all&keyword=%EA%B8%B0%ED%94%84%ED%8A%B8%EC%B9%B4%EB%93%9C",
   "keyword": "기프트카드",
-  "capturedAt": "",
-  "selectionMode": "empty",
-  "totalCandidates": 0,
-  "activeCandidates": 0,
-  "items": [],
-  "notice": "arca.live가 GitHub Actions/서버 요청을 403으로 차단했습니다. 기존 데이터 또는 빈 목록을 유지하고 전체 대시보드 수집은 계속 진행합니다.",
-  "error": "핫딜 페이지 fetch 실패 403: https://arca.live/b/hotdeal?target=all&keyword=%EA%B8%B0%ED%94%84%ED%8A%B8%EC%B9%B4%EB%93%9C",
-  "lastFailedAt": "2026-11-13 16:55"
+  "capturedAt": "2026-11-14 01:20",
+  "selectionMode": "active-first",
+  "totalCandidates": 20,
+  "activeCandidates": 20,
+  "items": [
+    {
+      "title": "G마켓",
+      "url": "https://arca.live/b/hotdeal/188941498?target=all&amp;keyword=%EA%B8%B0%ED%94%84%ED%8A%B8%EC%B9%B4%EB%93%9C&amp;p=1",
+      "status": "active",
+      "reason": "종료 문구가 없고 기프트카드/상품권 할인 키워드가 있어 유효 가능으로 표시합니다.",
+      "relativeTime": "",
+      "dateText": "",
+      "priceText": "",
+      "shop": "G마켓",
+      "badges": [
+        "G마켓",
+        "상품권/쿠폰"
+      ]
+    },
+    {
+      "title": "네이버",
+      "url": "https://arca.live/b/hotdeal/188845376?target=all&amp;keyword=%EA%B8%B0%ED%94%84%ED%8A%B8%EC%B9%B4%EB%93%9C&amp;p=1",
+      "status": "active",
+      "reason": "종료 문구가 없고 기프트카드/상품권 할인 키워드가 있어 유효 가능으로 표시합니다.",
+      "relativeTime": "",
+      "dateText": "",
+      "priceText": "",
+      "shop": "",
+      "badges": [
+        "네이버",
+        "상품권/쿠폰"
+      ]
+    },
+    {
+      "title": "네이버",
+      "url": "https://arca.live/b/hotdeal/188287988?target=all&amp;keyword=%EA%B8%B0%ED%94%84%ED%8A%B8%EC%B9%B4%EB%93%9C&amp;p=1",
+      "status": "active",
+      "reason": "종료 문구가 없고 기프트카드/상품권 할인 키워드가 있어 유효 가능으로 표시합니다.",
+      "relativeTime": "",
+      "dateText": "",
+      "priceText": "",
+      "shop": "",
+      "badges": [
+        "네이버",
+        "상품권/쿠폰"
+      ]
+    },
+    {
+      "title": "지마켓",
+      "url": "https://arca.live/b/hotdeal/188002370?target=all&amp;keyword=%EA%B8%B0%ED%94%84%ED%8A%B8%EC%B9%B4%EB%93%9C&amp;p=1",
+      "status": "active",
+      "reason": "종료 문구가 없고 기프트카드/상품권 할인 키워드가 있어 유효 가능으로 표시합니다.",
+      "relativeTime": "",
+      "dateText": "",
+      "priceText": "",
+      "shop": "",
+      "badges": [
+        "지마켓",
+        "상품권/쿠폰"
+      ]
+    },
+    {
+      "title": "네이버",
+      "url": "https://arca.live/b/hotdeal/187956218?target=all&amp;keyword=%EA%B8%B0%ED%94%84%ED%8A%B8%EC%B9%B4%EB%93%9C&amp;p=1",
+      "status": "active",
+      "reason": "종료 문구가 없고 기프트카드/상품권 할인 키워드가 있어 유효 가능으로 표시합니다.",
+      "relativeTime": "",
+      "dateText": "",
+      "priceText": "",
+      "shop": "",
+      "badges": [
+        "네이버",
+        "상품권/쿠폰"
+      ]
+    }
+  ]
 }
